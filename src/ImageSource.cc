@@ -12,6 +12,8 @@ using namespace std;
 
 USING_KARABO_NAMESPACES;
 
+#define REGISTER_SCENE(sceneName) this->registerScene(boost::bind(&Self::sceneName,this),#sceneName);
+
 namespace karabo {
 
 
@@ -40,11 +42,16 @@ namespace karabo {
                 .dataSchema(data)
                 .commit();
 
-        // TODO: availableScenes
+        VECTOR_STRING_ELEMENT(expected).key("availableScenes")
+                .setSpecialDisplayType(KARABO_SCHEMA_DISPLAY_TYPE_SCENES)
+                .readOnly().initialValue(std::vector<std::string>({"scene"}))
+                .commit();
     }
 
 
     ImageSource::ImageSource(const karabo::util::Hash& config) : Device<>(config) {
+        KARABO_SLOT(requestScene, karabo::util::Hash)
+        REGISTER_SCENE(scene);
     }
 
 
@@ -88,12 +95,13 @@ namespace karabo {
     }
 
 
-    // TODO docs
+    // TODO doc
     void ImageSource::writeChannels(karabo::util::NDArray& data, const karabo::util::Dims& binning,
                 const unsigned short bpp, const karabo::xms::EncodingType& encoding,
-                const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp) {
+                const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
+                const karabo::util::Hash& header) {
 
-        this->write_channel("output", data, binning, bpp, encoding, roiOffsets, timestamp);
+        this->write_channel("output", data, binning, bpp, encoding, roiOffsets, timestamp, header);
 
         // Reshaped image for DAQ
         // NB DAQ wants shape in CImg order, e.g. (width, height)
@@ -101,19 +109,58 @@ namespace karabo {
         daqShape.reverse();
         NDArray daqData = data;
         daqData.setShape(daqShape);
-        this->write_channel("daqOutput", daqData, binning, bpp, encoding, roiOffsets, timestamp);
+        this->write_channel("daqOutput", daqData, binning, bpp, encoding, roiOffsets, timestamp, header);
     }
 
 
     void ImageSource::write_channel(const std::string& nodeKey, karabo::util::NDArray& data, const karabo::util::Dims& binning,
                 const unsigned short bpp, const karabo::xms::EncodingType& encoding,
-                const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp) {
+                const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
+                const karabo::util::Hash& header) {
 
         karabo::xms::ImageData imageData(data, encoding);
         imageData.setBitsPerPixel(bpp);
         imageData.setROIOffsets(roiOffsets);
         imageData.setBinning(binning);
+        if (!header.empty()) {
+            imageData.setHeader(header);
+        }
 
         this->writeChannel(nodeKey, Hash("data.image", imageData), timestamp);
+    }
+
+
+    void ImageSource::requestScene(const karabo::util::Hash& params) {
+        /* Fulfill a scene request from another device.
+         */
+        KARABO_LOG_FRAMEWORK_INFO << "received requestScene" << params;
+        const std::string& sceneName = params.get<std::string>("name");
+        Hash result("type", "deviceScene", "origin", getInstanceId());
+        Hash& payload = result.bindReference<Hash>("payload");
+
+        // look up sceneName in m_scenes
+        auto it = m_scenes.find(sceneName);
+
+        payload.set("success", false);
+
+        // see if the scene requested is in the map of available scenes
+        // NOTE: This is overkill for the moment since there is only one scene.
+        if (it != m_scenes.end()) {
+            const SceneFunction& f = it->second;
+            if (!f.empty()) {
+                payload.set("success", true);
+                payload.set("name", it->first);
+                payload.set("data", f());
+            } else {
+                KARABO_LOG_FRAMEWORK_ERROR << it->first << " has no valid function subscribed to it";
+            }
+        }
+        reply(result);
+    }
+
+
+    void ImageSource::registerScene(const SceneFunction& sceneFunction, const std::string& funcName) {
+        // add funcName as key and sceneFunction as value in m_scenes
+        m_scenes[funcName] = sceneFunction;
     }
 }

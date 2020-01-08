@@ -38,7 +38,8 @@ namespace karabo {
 
         void writeChannels(karabo::util::NDArray& data, const karabo::util::Dims& binning,
                 const unsigned short bpp, const karabo::xms::EncodingType& encoding,
-                const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp);
+                const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
+                const karabo::util::Hash& header);
 
     private:
 
@@ -49,9 +50,18 @@ namespace karabo {
 
         void write_channel(const std::string& nodeKey, karabo::util::NDArray& data, const karabo::util::Dims& binning,
                 const unsigned short bpp, const karabo::xms::EncodingType& encoding,
-                const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp);
+                const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
+                const karabo::util::Hash& header);
 
-        // TODO implement scene map protocol
+            // implement scene map protocol
+            using SceneFunction = boost::function<std::string()>;
+            using SceneMap = std::map<std::string, SceneFunction>;
+            SceneMap m_scenes;
+            void requestScene(const karabo::util::Hash& update);
+            void registerScene(const SceneFunction& sceneFunction, const std::string& funcName);
+
+            // the main scene
+            std::string scene();
     };
 }
 
