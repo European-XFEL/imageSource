@@ -28,8 +28,6 @@ namespace karabo {
 
         virtual ~ImageSource();
 
-        virtual void preReconfigure(karabo::util::Hash& incomingReconfiguration);
-
     protected:
 
         void updateOutputSchema(const std::vector<int>& shape,
