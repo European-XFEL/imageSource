@@ -14,6 +14,7 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>src/ImageSource.cc</itemPath>
+      <itemPath>src/Scene.cc</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -63,6 +64,8 @@
       </item>
       <item path="src/ImageSource.hh" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/Scene.cc" ex="false" tool="1" flavor2="0">
+      </item>
     </conf>
     <conf name="Release" type="2">
       <toolsSet>
@@ -107,6 +110,8 @@
       <item path="src/ImageSource.cc" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/ImageSource.hh" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Scene.cc" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>
