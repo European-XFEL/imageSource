@@ -56,7 +56,6 @@ namespace karabo {
     ImageSource::~ImageSource() {
     }
 
-    // TODO doc
     void ImageSource::updateOutputSchema(const std::vector<int>& shape, const EncodingType& encoding,
             const Types::ReferenceType& kType) {
         Schema schemaUpdate;
@@ -93,7 +92,6 @@ namespace karabo {
     }
 
 
-    // TODO doc
     void ImageSource::writeChannels(NDArray& data, const Dims& binning,
             const unsigned short bpp, const EncodingType& encoding, const Dims& roiOffsets,
             const Timestamp& timestamp, const Hash& header) {
