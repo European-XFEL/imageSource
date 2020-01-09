@@ -64,11 +64,6 @@ namespace karabo {
                 const std::vector<int>& shape, const karabo::xms::EncodingType& encoding,
                 const karabo::util::Types::ReferenceType& kType);
 
-        void write_channel(const std::string& nodeKey, karabo::util::NDArray& data, const karabo::util::Dims& binning,
-                const unsigned short bpp, const karabo::xms::EncodingType& encoding,
-                const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
-                const karabo::util::Hash& header);
-
             // implement scene map protocol
             using SceneFunction = boost::function<std::string()>;
             using SceneMap = std::map<std::string, SceneFunction>;

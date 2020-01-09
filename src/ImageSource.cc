@@ -96,22 +96,6 @@ namespace karabo {
             const unsigned short bpp, const EncodingType& encoding, const Dims& roiOffsets,
             const Timestamp& timestamp, const Hash& header) {
 
-        this->write_channel("output", data, binning, bpp, encoding, roiOffsets, timestamp, header);
-
-        // Reshaped image for DAQ
-        // NB DAQ wants shape in CImg order, e.g. (width, height)
-        Dims daqShape = data.getShape();
-        daqShape.reverse();
-        NDArray daqData = data;
-        daqData.setShape(daqShape);
-        this->write_channel("daqOutput", daqData, binning, bpp, encoding, roiOffsets, timestamp, header);
-    }
-
-
-    void ImageSource::write_channel(const std::string& nodeKey, NDArray& data, const Dims& binning,
-            const unsigned short bpp, const EncodingType& encoding, const Dims& roiOffsets,
-            const Timestamp& timestamp, const Hash& header) {
-
         karabo::xms::ImageData imageData(data, encoding);
         imageData.setBitsPerPixel(bpp);
         imageData.setROIOffsets(roiOffsets);
@@ -120,7 +104,14 @@ namespace karabo {
             imageData.setHeader(header);
         }
 
-        this->writeChannel(nodeKey, Hash("data.image", imageData), timestamp);
+        this->writeChannel("output", Hash("data.image", imageData), timestamp);
+
+        // NB DAQ wants shape in CImg order, e.g. (width, height)
+        Dims daqShape = data.getShape();
+        daqShape.reverse();
+
+        imageData.setDimensions(daqShape);
+        this->writeChannel("daqOutput", Hash("data.image", imageData), timestamp);
     }
 
 
