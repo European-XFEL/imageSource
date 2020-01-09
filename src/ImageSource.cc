@@ -12,8 +12,6 @@ using namespace std;
 
 USING_KARABO_NAMESPACES;
 
-#define REGISTER_SCENE(sceneName) this->registerScene(boost::bind(&Self::sceneName,this),#sceneName);
-
 namespace karabo {
 
 
@@ -51,7 +49,7 @@ namespace karabo {
 
     ImageSource::ImageSource(const karabo::util::Hash& config) : Device<>(config) {
         KARABO_SLOT(requestScene, karabo::util::Hash)
-        REGISTER_SCENE(scene);
+        this->registerScene(boost::bind(&Self::scene, this), "scene");
     }
 
 
