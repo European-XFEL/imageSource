@@ -1,7 +1,7 @@
 /*
  * Author: <parenti>
  *
- * Created on January  7, 2020, 05:11 PM
+ * Created on January 7, 2020, 05:11 PM
  *
  * Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
  */
@@ -57,8 +57,8 @@ namespace karabo {
     }
 
     // TODO doc
-    void ImageSource::updateOutputSchema(const std::vector<int>& shape, const karabo::xms::EncodingType& encoding,
-            const karabo::util::Types::ReferenceType& kType) {
+    void ImageSource::updateOutputSchema(const std::vector<int>& shape, const EncodingType& encoding,
+            const Types::ReferenceType& kType) {
         Schema schemaUpdate;
         this->schema_update_helper(schemaUpdate, "output", "Output", shape, encoding, kType);
 
@@ -70,9 +70,9 @@ namespace karabo {
     }
 
 
-    void ImageSource::schema_update_helper(karabo::util::Schema& schemaUpdate, const std::string& nodeKey,
-            const std::string& displayedName, const std::vector<int>& shape, const karabo::xms::EncodingType& encoding,
-            const karabo::util::Types::ReferenceType& kType) {
+    void ImageSource::schema_update_helper(Schema& schemaUpdate, const std::string& nodeKey,
+            const std::string& displayedName, const std::vector<int>& shape, const EncodingType& encoding,
+            const Types::ReferenceType& kType) {
         Schema dataSchema;
         NODE_ELEMENT(dataSchema).key("data")
                 .displayedName("Data")
@@ -94,10 +94,9 @@ namespace karabo {
 
 
     // TODO doc
-    void ImageSource::writeChannels(karabo::util::NDArray& data, const karabo::util::Dims& binning,
-                const unsigned short bpp, const karabo::xms::EncodingType& encoding,
-                const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
-                const karabo::util::Hash& header) {
+    void ImageSource::writeChannels(NDArray& data, const Dims& binning,
+            const unsigned short bpp, const EncodingType& encoding, const Dims& roiOffsets,
+            const Timestamp& timestamp, const Hash& header) {
 
         this->write_channel("output", data, binning, bpp, encoding, roiOffsets, timestamp, header);
 
@@ -111,10 +110,9 @@ namespace karabo {
     }
 
 
-    void ImageSource::write_channel(const std::string& nodeKey, karabo::util::NDArray& data, const karabo::util::Dims& binning,
-                const unsigned short bpp, const karabo::xms::EncodingType& encoding,
-                const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
-                const karabo::util::Hash& header) {
+    void ImageSource::write_channel(const std::string& nodeKey, NDArray& data, const Dims& binning,
+            const unsigned short bpp, const EncodingType& encoding, const Dims& roiOffsets,
+            const Timestamp& timestamp, const Hash& header) {
 
         karabo::xms::ImageData imageData(data, encoding);
         imageData.setBitsPerPixel(bpp);

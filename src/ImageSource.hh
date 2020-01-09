@@ -1,7 +1,7 @@
 /*
  * Author: <parenti>
  *
- * Created on January  7, 2020, 05:11 PM
+ * Created on January 7, 2020, 05:11 PM
  *
  * Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
  */
