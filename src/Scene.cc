@@ -6,7 +6,7 @@ USING_KARABO_NAMESPACES;
 namespace karabo {
 
 
-    std::string ImageSource::scene() {
+    std::string CameraImageSource::scene() {
         const std::string& instanceId = this->getInstanceId();
         std::ostringstream output;
         output << ""

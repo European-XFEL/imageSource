@@ -16,6 +16,7 @@ namespace karabo {
 
 
     KARABO_REGISTER_FOR_CONFIGURATION(BaseDevice, Device<>, ImageSource)
+    KARABO_REGISTER_FOR_CONFIGURATION(BaseDevice, Device<>, ImageSource, CameraImageSource)
 
     void ImageSource::expectedParameters(Schema& expected) {
         Schema data;
@@ -48,8 +49,6 @@ namespace karabo {
 
 
     ImageSource::ImageSource(const karabo::util::Hash& config) : Device<>(config) {
-        KARABO_SLOT(requestScene, karabo::util::Hash)
-        this->registerScene(boost::bind(&Self::scene, this), "scene");
     }
 
 
@@ -115,7 +114,21 @@ namespace karabo {
     }
 
 
-    void ImageSource::requestScene(const karabo::util::Hash& params) {
+    void CameraImageSource::expectedParameters(Schema& expected) {
+    }
+
+
+    CameraImageSource::CameraImageSource(const karabo::util::Hash& config) : ImageSource(config) {
+        KARABO_SLOT(requestScene, karabo::util::Hash)
+        this->registerScene(boost::bind(&Self::scene, this), "scene");
+    }
+
+
+    CameraImageSource::~CameraImageSource() {
+    }
+
+
+    void CameraImageSource::requestScene(const karabo::util::Hash& params) {
         /* Fulfill a scene request from another device.
          */
         KARABO_LOG_FRAMEWORK_INFO << "received requestScene" << params;
@@ -144,7 +157,7 @@ namespace karabo {
     }
 
 
-    void ImageSource::registerScene(const SceneFunction& sceneFunction, const std::string& funcName) {
+    void CameraImageSource::registerScene(const SceneFunction& sceneFunction, const std::string& funcName) {
         // add funcName as key and sceneFunction as value in m_scenes
         m_scenes[funcName] = sceneFunction;
     }
