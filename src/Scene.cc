@@ -39,7 +39,7 @@ namespace karabo {
             "		</svg:g>"
             "		<svg:rect height=\"30\" krb:class=\"DisplayComponent\" krb:keys=\"" << instanceId << ".state\" krb:staticText=\"\" krb:widget=\"DisplayStateColor\" width=\"290\" x=\"500\" y=\"90\"/>"
             "		<svg:rect height=\"30\" krb:class=\"DisplayComponent\" krb:keys=\"" << instanceId << ".state\" krb:widget=\"DisplayLabel\" width=\"290\" x=\"500\" y=\"90\"/>"
-            "		<svg:rect height=\"318\" krb:class=\"DisplayComponent\" krb:keys=\"" << instanceId << ".output.schema.data.image\" krb:show_axes=\"true\" krb:show_color_bar=\"true\" krb:show_tool_bar=\"true\" krb:widget=\"ScientificImage\" width=\"464\" x=\"11\" y=\"76\"/>"
+            "		<svg:rect height=\"390\" krb:class=\"DisplayComponent\" krb:keys=\"" << instanceId << ".output.schema.data.image\" krb:colormap=\"viridis\" krb:widget=\"WebCamGraph\" width=\"430\" x=\"11\" y=\"76\"/>"
             "	</svg:g>"
             "</svg:svg>"
             "";
