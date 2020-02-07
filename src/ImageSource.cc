@@ -41,10 +41,6 @@ namespace karabo {
                 .dataSchema(data)
                 .commit();
 
-        VECTOR_STRING_ELEMENT(expected).key("availableScenes")
-                .setSpecialDisplayType(KARABO_SCHEMA_DISPLAY_TYPE_SCENES)
-                .readOnly().initialValue(std::vector<std::string>({"scene"}))
-                .commit();
     }
 
 
@@ -115,6 +111,10 @@ namespace karabo {
 
 
     void CameraImageSource::expectedParameters(Schema& expected) {
+        VECTOR_STRING_ELEMENT(expected).key("availableScenes")
+                .setSpecialDisplayType(KARABO_SCHEMA_DISPLAY_TYPE_SCENES)
+                .readOnly().initialValue(std::vector<std::string>({"scene"}))
+                .commit();
     }
 
 
