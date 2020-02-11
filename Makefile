@@ -71,7 +71,9 @@ build: .build-post
 	@$(CP) -fp $(CND_BASEDIR)/nbproject/Makefile-$(CONF).mk $(CND_BASEDIR)/nbproject/Karabo-$(CONF)-$(CURRENT_PLATFORM).mk
 
 # Add your post 'build' code here...
-
+	mkdir -p $(KARABO)/extern/include/image_source
+	@$(CP) -fp $(CND_BASEDIR)/src/*.hh $(KARABO)/extern/include/image_source/.
+	@$(CP) -fp $(CND_DISTDIR)/$(CONF)/$(CND_PLATFORM_$(CONF))/lib*.so $(KARABO)/extern/lib/.
 
 # clean
 clean: .clean-post
