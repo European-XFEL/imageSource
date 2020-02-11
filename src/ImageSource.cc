@@ -1,7 +1,7 @@
 /*
  * Author: <parenti>
  *
- * Created on January, 2020, 05:11 PM
+ * Created on January 7, 2020, 05:11 PM
  *
  * Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
  */
@@ -14,10 +14,32 @@ USING_KARABO_NAMESPACES;
 
 namespace karabo {
 
-
     KARABO_REGISTER_FOR_CONFIGURATION(BaseDevice, Device<>, ImageSource)
 
+
     void ImageSource::expectedParameters(Schema& expected) {
+        Schema data;
+
+        NODE_ELEMENT(data).key("data")
+                .displayedName("Data")
+                .setDaqDataType(DaqDataType::TRAIN)
+                .commit();
+
+        IMAGEDATA(data).key("data.image")
+                .displayedName("Image")
+                .commit();
+
+        OUTPUT_CHANNEL(expected).key("output")
+                .displayedName("Output")
+                .dataSchema(data)
+                .commit();
+
+        // Second output channel for the DAQ
+        OUTPUT_CHANNEL(expected).key("daqOutput")
+                .displayedName("DAQ Output")
+                .dataSchema(data)
+                .commit();
+
     }
 
 
@@ -28,11 +50,61 @@ namespace karabo {
     ImageSource::~ImageSource() {
     }
 
+    void ImageSource::updateOutputSchema(const std::vector<int>& shape, const EncodingType& encoding,
+            const Types::ReferenceType& kType) {
+        Schema schemaUpdate;
+        this->schema_update_helper(schemaUpdate, "output", "Output", shape, encoding, kType);
 
-    void ImageSource::preReconfigure(karabo::util::Hash& incomingReconfiguration) {
+        std::vector<int> daqShape = shape;
+        std::reverse(daqShape.begin(), daqShape.end()); // NB DAQ wants fastest changing index first, e.g. (width, height) or (channel, width, height)
+        this->schema_update_helper(schemaUpdate, "daqOutput", "DAQ Output", daqShape, encoding, kType);
+
+        this->appendSchema(schemaUpdate);
     }
 
 
-    void ImageSource::postReconfigure() {
+    void ImageSource::schema_update_helper(Schema& schemaUpdate, const std::string& nodeKey,
+            const std::string& displayedName, const std::vector<int>& shape, const EncodingType& encoding,
+            const Types::ReferenceType& kType) {
+        Schema dataSchema;
+        NODE_ELEMENT(dataSchema).key("data")
+                .displayedName("Data")
+                .setDaqDataType(DaqDataType::TRAIN)
+                .commit();
+
+        IMAGEDATA(dataSchema).key("data.image")
+                .displayedName(displayedName)
+                .setDimensions(karabo::util::toString(shape))
+                .setType(kType)
+                .setEncoding(encoding)
+                .commit();
+
+        OUTPUT_CHANNEL(schemaUpdate).key(nodeKey)
+                .displayedName(displayedName)
+                .dataSchema(dataSchema)
+                .commit();
+    }
+
+
+    void ImageSource::writeChannels(NDArray& data, const Dims& binning,
+            const unsigned short bpp, const EncodingType& encoding, const Dims& roiOffsets,
+            const Timestamp& timestamp, const Hash& header) {
+
+        karabo::xms::ImageData imageData(data, encoding);
+        imageData.setBitsPerPixel(bpp);
+        imageData.setROIOffsets(roiOffsets);
+        imageData.setBinning(binning);
+        if (!header.empty()) {
+            imageData.setHeader(header);
+        }
+
+        this->writeChannel("output", Hash("data.image", imageData), timestamp);
+
+        // NB DAQ wants fastest changing index first, e.g. (width, height) or (channel, width, height)
+        Dims daqShape = data.getShape();
+        daqShape.reverse();
+
+        imageData.setDimensions(daqShape);
+        this->writeChannel("daqOutput", Hash("data.image", imageData), timestamp);
     }
 }

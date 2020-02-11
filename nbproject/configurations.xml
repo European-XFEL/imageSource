@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>src/CameraImageSource.hh</itemPath>
       <itemPath>src/ImageSource.hh</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -13,7 +14,9 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>src/CameraImageSource.cc</itemPath>
       <itemPath>src/ImageSource.cc</itemPath>
+      <itemPath>src/Scene.cc</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -59,9 +62,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="src/CameraImageSource.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/CameraImageSource.hh" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/ImageSource.cc" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/ImageSource.hh" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Scene.cc" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="2">
@@ -104,9 +113,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="src/CameraImageSource.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/CameraImageSource.hh" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/ImageSource.cc" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/ImageSource.hh" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Scene.cc" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>
