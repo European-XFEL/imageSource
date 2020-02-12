@@ -50,12 +50,12 @@ namespace karabo {
     ImageSource::~ImageSource() {
     }
 
-    void ImageSource::updateOutputSchema(const std::vector<int>& shape, const EncodingType& encoding,
+    void ImageSource::updateOutputSchema(const std::vector<unsigned long long>& shape, const EncodingType& encoding,
             const Types::ReferenceType& kType) {
         Schema schemaUpdate;
         this->schema_update_helper(schemaUpdate, "output", "Output", shape, encoding, kType);
 
-        std::vector<int> daqShape = shape;
+        std::vector<unsigned long long> daqShape = shape;
         std::reverse(daqShape.begin(), daqShape.end()); // NB DAQ wants fastest changing index first, e.g. (width, height) or (channel, width, height)
         this->schema_update_helper(schemaUpdate, "daqOutput", "DAQ Output", daqShape, encoding, kType);
 
@@ -64,7 +64,7 @@ namespace karabo {
 
 
     void ImageSource::schema_update_helper(Schema& schemaUpdate, const std::string& nodeKey,
-            const std::string& displayedName, const std::vector<int>& shape, const EncodingType& encoding,
+            const std::string& displayedName, const std::vector<unsigned long long>& shape, const EncodingType& encoding,
             const Types::ReferenceType& kType) {
         Schema dataSchema;
         NODE_ELEMENT(dataSchema).key("data")
