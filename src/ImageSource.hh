@@ -37,7 +37,7 @@ namespace karabo {
          * @param encoding The encoding of the image, e.g. Encoding::GRAY or Encoding::RGB.
          * @param kType The image data type, e.g. Types::UINT16.
          */
-        void updateOutputSchema(const std::vector<int>& shape,
+        void updateOutputSchema(const std::vector<unsigned long long>& shape,
                 const karabo::xms::EncodingType& encoding,
                 const karabo::util::Types::ReferenceType& kType);
 
@@ -61,7 +61,7 @@ namespace karabo {
 
         void schema_update_helper(karabo::util::Schema& schemaUpdate,
                 const std::string& nodeKey, const std::string& displayedName,
-                const std::vector<int>& shape, const karabo::xms::EncodingType& encoding,
+                const std::vector<unsigned long long>& shape, const karabo::xms::EncodingType& encoding,
                 const karabo::util::Types::ReferenceType& kType);
 
     };
