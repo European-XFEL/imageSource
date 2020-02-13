@@ -86,7 +86,7 @@ namespace karabo {
     }
 
 
-    void ImageSource::writeChannels(NDArray& data, const Dims& binning,
+    void ImageSource::writeChannels(const NDArray& data, const Dims& binning,
             const unsigned short bpp, const EncodingType& encoding, const Dims& roiOffsets,
             const Timestamp& timestamp, const Hash& header) {
 

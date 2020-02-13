@@ -52,7 +52,7 @@ namespace karabo {
          * @param timestamp The image timestamp.
          * @parame header Any additional information to be written in the image header.
          */
-        void writeChannels(karabo::util::NDArray& data, const karabo::util::Dims& binning,
+        void writeChannels(const karabo::util::NDArray& data, const karabo::util::Dims& binning,
                 const unsigned short bpp, const karabo::xms::EncodingType& encoding,
                 const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
                 const karabo::util::Hash& header);
