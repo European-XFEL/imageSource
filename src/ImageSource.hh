@@ -50,7 +50,7 @@ namespace karabo {
          * @param encoding The image encoding, e.g. Encoding::GRAY.
          * @param roiOffsets The offset of the Region-of-Interest, e.g. (roiY, roiX).
          * @param timestamp The image timestamp.
-         * @parame header Any additional information to be written in the image header.
+         * @param header Any additional information to be written in the image header.
          */
         void writeChannels(const karabo::util::NDArray& data, const karabo::util::Dims& binning,
                 const unsigned short bpp, const karabo::xms::EncodingType& encoding,
@@ -66,6 +66,30 @@ namespace karabo {
 
     };
 
+    namespace util {
+        /**
+         * @brief Unpack the input MONO12PACKED data to MONO12.
+         * 
+         * In MONO12PACKED pixel data format, every 3 bytes contain data for 2 pixels,
+         * according to the following table:
+         * 
+         * +------+---------------------+
+         * | Byte |  Pixel - Data bits  |
+         * +------+---------------------+
+         * |  B0  |      P0 11...4      |
+         * |  B1  | P1 3...0 | P0 3...0 |
+         * |  B2  |      P1 11...4      |
+         * |  ... |         ...         |
+         * |  Bm  |      Pn 11...4      |
+         * +------+---------------------+
+         * 
+         * @param data The pointer to the input packed data
+         * @param width The image width
+         * @param heigth The image height
+         * @param unpackedData The pointer to the output unpacked data
+         */
+        void unpackMono12Packed(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
+    }
 }
 
 #endif

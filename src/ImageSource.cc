@@ -73,7 +73,7 @@ namespace karabo {
                 .commit();
 
         IMAGEDATA(dataSchema).key("data.image")
-                .displayedName(displayedName)
+                .displayedName("Image")
                 .setDimensions(karabo::util::toString(shape))
                 .setType(kType)
                 .setEncoding(encoding)
@@ -107,4 +107,16 @@ namespace karabo {
         imageData.setDimensions(daqShape);
         this->writeChannel("daqOutput", Hash("data.image", imageData), timestamp);
     }
+
+
+    void util::unpackMono12Packed(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData) {
+        size_t idx = 0, px = 0;
+        while (px+1 < width*height) {
+            unpackedData[px] = (data[idx] << 4) | (data[idx+1] & 0xF);
+            unpackedData[px+1] = (data[idx+2] << 4) | (data[idx+1] >> 4);
+            idx += 3;
+            px += 2;
+        }
+    }
+
 }
