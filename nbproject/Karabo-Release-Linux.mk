@@ -39,6 +39,12 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/ImageSource.o \
 	${OBJECTDIR}/src/Scene.o
 
+# Test Directory
+TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
+
+# Test Files
+TESTFILES= \
+	${TESTDIR}/TestFiles/f1
 
 # C Compiler Flags
 CFLAGS=
@@ -81,6 +87,73 @@ ${OBJECTDIR}/src/Scene.o: src/Scene.cc
 
 # Subprojects
 .build-subprojects:
+
+# Build Test Targets
+.build-tests-conf: .build-conf ${TESTFILES}
+${TESTDIR}/TestFiles/f1: ${TESTDIR}/src/tests/ImageSourceTest.o ${TESTDIR}/src/tests/test_runner.o ${OBJECTFILES:%.o=%_nomain.o}
+	${MKDIR} -p ${TESTDIR}/TestFiles
+	${LINK.cc}   -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} `pkg-config cppunit --libs`   
+
+
+${TESTDIR}/src/tests/ImageSourceTest.o: src/tests/ImageSourceTest.cc 
+	${MKDIR} -p ${TESTDIR}/src/tests
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -MMD -MP -MF "$@.d" -o ${TESTDIR}/src/tests/ImageSourceTest.o src/tests/ImageSourceTest.cc
+
+
+${TESTDIR}/src/tests/test_runner.o: src/tests/test_runner.cc 
+	${MKDIR} -p ${TESTDIR}/src/tests
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -MMD -MP -MF "$@.d" -o ${TESTDIR}/src/tests/test_runner.o src/tests/test_runner.cc
+
+
+${OBJECTDIR}/src/CameraImageSource_nomain.o: ${OBJECTDIR}/src/CameraImageSource.o src/CameraImageSource.cc 
+	${MKDIR} -p ${OBJECTDIR}/src
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/CameraImageSource.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/CameraImageSource_nomain.o src/CameraImageSource.cc;\
+	else  \
+	    ${CP} ${OBJECTDIR}/src/CameraImageSource.o ${OBJECTDIR}/src/CameraImageSource_nomain.o;\
+	fi
+
+${OBJECTDIR}/src/ImageSource_nomain.o: ${OBJECTDIR}/src/ImageSource.o src/ImageSource.cc 
+	${MKDIR} -p ${OBJECTDIR}/src
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/ImageSource.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ImageSource_nomain.o src/ImageSource.cc;\
+	else  \
+	    ${CP} ${OBJECTDIR}/src/ImageSource.o ${OBJECTDIR}/src/ImageSource_nomain.o;\
+	fi
+
+${OBJECTDIR}/src/Scene_nomain.o: ${OBJECTDIR}/src/Scene.o src/Scene.cc 
+	${MKDIR} -p ${OBJECTDIR}/src
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/Scene.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Scene_nomain.o src/Scene.cc;\
+	else  \
+	    ${CP} ${OBJECTDIR}/src/Scene.o ${OBJECTDIR}/src/Scene_nomain.o;\
+	fi
+
+# Run Test Targets
+.test-conf:
+	@if [ "${TEST}" = "" ]; \
+	then  \
+	    ${TESTDIR}/TestFiles/f1 || true; \
+	else  \
+	    ./${TEST} || true; \
+	fi
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
