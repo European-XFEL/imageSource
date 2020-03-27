@@ -109,6 +109,12 @@ namespace karabo {
     }
 
 
+    void ImageSource::signalEOS() {
+        this->signalEndOfStream("output");
+        this->signalEndOfStream("daqOutput");
+    }
+
+
     void util::unpackMono12Packed(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData) {
         size_t idx = 0, px = 0;
         while (px+1 < width*height) {

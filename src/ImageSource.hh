@@ -57,6 +57,13 @@ namespace karabo {
                 const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
                 const karabo::util::Hash& header);
 
+
+        /**
+         * @brief Send an end-of-stream signal to 'output' and 'daqOutput' channels
+         * 
+         */
+        void signalEOS();
+
     private:
 
         void schema_update_helper(karabo::util::Schema& schemaUpdate,
