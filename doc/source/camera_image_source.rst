@@ -9,3 +9,8 @@ devices.
 In addition to the functionalities provided by its :ref:`base class
 <image_source>`, this class provides a default scene for cameras.
 
+.. doxygenclass:: karabo::CameraImageSource
+   :project: ImageSource
+   :members:
+   :protected-members:
+   :outline:

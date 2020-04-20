@@ -14,4 +14,8 @@ The advantage of using this class, is that it can take care of creating the
 necessary output channels in the schema, and it provides functions to output
 images and End-of-Stream signals to them.
 
-
+.. doxygenclass:: karabo::ImageSource
+   :project: ImageSource
+   :members:
+   :protected-members:
+   :outline:

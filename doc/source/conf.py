@@ -17,7 +17,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
+import os
+import os.path
+import subprocess
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -35,6 +37,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
+    'breathe',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -151,7 +154,7 @@ html_theme = 'default'
 # html_logo = None
 
 # The name of an image file (relative to this directory) to use as a favicon of
-# the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
+# the docs. This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
 #
 # html_favicon = None
@@ -346,3 +349,13 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
+
+# make doxygen output
+doxydir = '../build/doxygen'
+if not os.path.exists(doxydir):
+    os.makedirs(doxydir)
+subprocess.call('doxygen', shell=True)
+
+# we use breathe to include doxygen output into our sphinx documentation
+breathe_projects = {"ImageSource": os.path.abspath("{}/xml").format(doxydir)}
+breathe_default_project = "ImageSource"

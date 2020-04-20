@@ -79,20 +79,28 @@ namespace karabo {
          * 
          * In MONO12PACKED pixel data format, every 3 bytes contain data for 2 pixels,
          * according to the following table:
-         * 
+         *
+         * @verbatim embed:rst:leading-asterisk
+         *
          * +------+---------------------+
          * | Byte |  Pixel - Data bits  |
-         * +------+---------------------+
+         * +======+=====================+
          * |  B0  |      P0 11...4      |
+         * +------+---------------------+
          * |  B1  | P1 3...0 | P0 3...0 |
+         * +------+---------------------+
          * |  B2  |      P1 11...4      |
+         * +------+---------------------+
          * |  ... |         ...         |
+         * +------+---------------------+
          * |  Bm  |      Pn 11...4      |
          * +------+---------------------+
+         *
+         * @endverbatim
          * 
          * @param data The pointer to the input packed data
          * @param width The image width
-         * @param heigth The image height
+         * @param height The image height
          * @param unpackedData The pointer to the output unpacked data
          */
         void unpackMono12Packed(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
