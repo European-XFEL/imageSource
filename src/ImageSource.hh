@@ -10,7 +10,7 @@
 #define KARABO_IMAGESOURCE_HH
 
 #include <karabo/karabo.hpp>
-#include "version.hh"  // provides PACKAGE_VERSION
+#include "version.hh"  // provides IMAGESOURCE_PACKAGE_VERSION
 
 /**
  * The main Karabo namespace
@@ -21,7 +21,7 @@ namespace karabo {
 
     public:
 
-        KARABO_CLASSINFO(ImageSource, "ImageSource", PACKAGE_VERSION)
+        KARABO_CLASSINFO(ImageSource, "ImageSource", IMAGESOURCE_PACKAGE_VERSION)
 
         static void expectedParameters(karabo::util::Schema& expected);
 
