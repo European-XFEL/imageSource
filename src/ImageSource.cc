@@ -27,6 +27,10 @@ namespace karabo {
 
         IMAGEDATA(data).key("data.image")
                 .displayedName("Image")
+                // Set initial dummy values for DAQ
+                .setDimensions("0, 0")
+                .setType(Types::UINT16)
+                .setEncoding(Encoding::UNDEFINED)
                 .commit();
 
         OUTPUT_CHANNEL(expected).key("output")
