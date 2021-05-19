@@ -17,7 +17,10 @@ class ImageSourceTest : public CPPUNIT_NS::TestFixture {
 
     CPPUNIT_TEST(shouldCreateImageSource);
     CPPUNIT_TEST(shouldCreateCameraImageSource);
-    CPPUNIT_TEST(shouldUnpackData);
+    CPPUNIT_TEST(shouldUnpackMono12Packed);
+    CPPUNIT_TEST(shouldUnpackMono12p);
+    CPPUNIT_TEST(shouldUnpackMono10p);
+    CPPUNIT_TEST(shouldNotUnpackMonoXXp);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -30,7 +33,10 @@ public:
 private:
     void shouldCreateImageSource();
     void shouldCreateCameraImageSource();
-    void shouldUnpackData();
+    void shouldUnpackMono12Packed();
+    void shouldUnpackMono12p();
+    void shouldUnpackMono10p();
+    void shouldNotUnpackMonoXXp();
 
 private:
     karabo::util::Hash m_config;

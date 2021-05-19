@@ -120,8 +120,8 @@ namespace karabo {
 
 
     void util::unpackMono12Packed(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData) {
-        size_t idx = 0, px = 0;
-        while (px+1 < width*height) {
+        size_t idx = 0, px = 0, image_size = width * height;
+        while (px+1 < image_size) {
             unpackedData[px] = (data[idx] << 4) | (data[idx+1] & 0xF);
             unpackedData[px+1] = (data[idx+2] << 4) | (data[idx+1] >> 4);
             idx += 3;
@@ -129,4 +129,31 @@ namespace karabo {
         }
     }
 
+
+    void util::unpackMonoXXp(const uint8_t* data, const uint32_t width, const uint32_t height, const uint8_t bpp, uint16_t* unpackedData) {
+        if (bpp < 9 || bpp > 15) {
+            throw KARABO_PARAMETER_EXCEPTION("Invalid bpp value: " + std::to_string(bpp) + ". It must be in [9, 15].");
+        }
+
+        const uint16_t mask = 0xFFFF >> (16 - bpp);
+        size_t bits = 0, px = 0, image_size = width * height;
+        while (px < image_size) {
+            const size_t idx = bits / 8;
+            const size_t shift = bits % 8;
+            unpackedData[px] = (*reinterpret_cast<const uint16_t*>(data + idx) >> shift) & mask;
+
+            bits += bpp;
+            px += 1;
+        }
+    }
+
+
+    void util::unpackMono10p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData) {
+        util::unpackMonoXXp(data, width, height, 10, unpackedData);
+    }
+
+
+    void util::unpackMono12p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData) {
+        util::unpackMonoXXp(data, width, height, 12, unpackedData);
+    }
 }
