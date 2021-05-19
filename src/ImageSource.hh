@@ -105,6 +105,45 @@ namespace karabo {
          * @param unpackedData The pointer to the output unpacked data
          */
         void unpackMono12Packed(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
+
+        /**
+         * @brief Unpack the input MonoXXp data to MONO12, where XX is usually
+         * 10 or 12.
+         * 
+         * In MonoXXp pixel data format, XX-bit pixel data are packed, with no
+         * padding bits in between. Padding 0s are added to the MSB if needed.
+         * For example Mono10p pixels are packed this way:
+         *
+         * @verbatim embed:rst:leading-asterisk
+         *
+         * +------+---------------------+
+         * | Byte |  Pixel - Data bits  |
+         * +======+=====================+
+         * |  B0  |      P0 7...0       |
+         * +------+---------------------+
+         * |  B1  | P1 5...0 | P0 9...8 |
+         * +------+---------------------+
+         * |  B2  | P2 3...0 | P1 9...6 |
+         * +------+---------------------+
+         * |  B3  | P4 1...0 | P3 9...4 |
+         * +------+---------------------+
+         * |  ... |         ...         |
+         * +------+---------------------+
+         *
+         * @endverbatim
+         * 
+         * @param data The pointer to the input packed data
+         * @param width The image width
+         * @param height The image height
+         * @param bpp The bits-per-pixel, normally 10 or 12
+         * @param unpackedData The pointer to the output unpacked data
+         */
+        void unpackMonoXXp(const uint8_t* data, const uint32_t width, const uint32_t height, const uint8_t bpp, uint16_t* unpackedData);
+
+        // Specialize unpackMonoXXp for XX = 10, 12
+        void unpackMono10p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
+        void unpackMono12p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
+
     }
 }
 
