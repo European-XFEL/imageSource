@@ -144,6 +144,23 @@ namespace karabo {
         void unpackMono10p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
         void unpackMono12p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
 
+        /**
+         * @brief Decode a JPEG image to GRAY.
+         *
+         * @param imd The ImageData object - encoded as JPEG - to be decoded as GRAY
+         */
+        void decodeJPEG(karabo::xms::ImageData& imd);
+
+        /**
+         * @brief Encode a GRAY image to JPEG.
+         *
+         * @param imd The ImageData object - encoded as JPEG - to be decoded as GRAY
+         * @parame quality The compression quality. Levels of 90% or higher are considered "high
+         * quality", 80-90% is "medium quality", 70-80% is "low quality".
+         * @comment An optional comment to be added to the JPEG image. Its maximum length is 65533 Bytes.
+         */
+        void encodeJPEG(karabo::xms::ImageData& imd, unsigned int quality=100, const std::string& comment="");
+
     }
 }
 

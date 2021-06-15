@@ -21,6 +21,8 @@ class ImageSourceTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(shouldUnpackMono12p);
     CPPUNIT_TEST(shouldUnpackMono10p);
     CPPUNIT_TEST(shouldNotUnpackMonoXXp);
+    CPPUNIT_TEST(shouldEncodeJpeg);
+    CPPUNIT_TEST(shouldDecodeJpeg);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -37,6 +39,8 @@ private:
     void shouldUnpackMono12p();
     void shouldUnpackMono10p();
     void shouldNotUnpackMonoXXp();
+    void shouldEncodeJpeg();
+    void shouldDecodeJpeg();
 
 private:
     karabo::util::Hash m_config;
