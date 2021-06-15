@@ -153,3 +153,239 @@ void ImageSourceTest::shouldNotUnpackMonoXXp() {
     CPPUNIT_ASSERT_THROW(unpackMonoXXp(packedData.data(), 2, 1, 16, unpackedData.data()),
         karabo::util::ParameterException);
 }
+
+void ImageSourceTest::shouldEncodeJpeg() {
+    using namespace karabo::util;
+    using namespace karabo::xms;
+
+    const std::string inImage1("src/tests/gray21.512.raw"); // grayscale data
+    const std::string outImage1("src/tests/gray_test.jpg");
+
+    std::ifstream ifs1(inImage1, std::fstream::binary);
+    if (ifs1) {
+        // Get length of file
+        ifs1.seekg(0, ifs1.end);
+        const size_t length = ifs1.tellg();
+        ifs1.seekg(0, ifs1.beg);
+
+        char* buffer = new char[length];
+
+        // Read file in memory
+        ifs1.read(buffer, length);
+        ifs1.close();
+
+        // Create ImageData (no copy)
+        Dims dims(512, 512);
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) {delete [] ptr;});
+        ImageData imd(data, dims, Encoding::GRAY);
+
+        // Decode JPEG
+        CPPUNIT_ASSERT_NO_THROW(encodeJPEG(imd));
+
+        CPPUNIT_ASSERT_EQUAL((int)Encoding::JPEG, imd.getEncoding());
+        CPPUNIT_ASSERT_EQUAL(false, imd.isIndexable());
+        CPPUNIT_ASSERT_EQUAL((size_t)2, imd.getDimensions().rank());
+        CPPUNIT_ASSERT_EQUAL(512ull, imd.getDimensions().x1());
+        CPPUNIT_ASSERT_EQUAL(512ull, imd.getDimensions().x2());
+
+        // Save encoded image to file for testing with Python
+        std::ofstream ofs(outImage1, std::fstream::binary | std::fstream::trunc);
+        if (ofs) {
+            const NDArray& jpg_data = imd.getData();
+            const size_t jpg_length = jpg_data.byteSize();
+            ofs.write((char*)jpg_data.getData<unsigned char>(), jpg_length);
+            ofs.close();
+        }
+
+    } else {
+        // Could not open RAW test image
+        throw KARABO_IO_EXCEPTION("Could not open test image " + inImage1);
+    }
+
+    const std::string inImage2("src/tests/4.2.03.raw"); // RGB data
+    const std::string outImage2("src/tests/rgb_test.jpg");
+
+    std::ifstream ifs2(inImage2, std::fstream::binary);
+    if (ifs2) {
+        // Get length of file
+        ifs2.seekg(0, ifs2.end);
+        const size_t length = ifs2.tellg();
+        ifs2.seekg(0, ifs2.beg);
+
+        char* buffer = new char[length];
+
+        // Read file in memory
+        ifs2.read(buffer, length);
+        ifs2.close();
+
+        // Create ImageData (no copy)
+        Dims dims(512, 512, 3);
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) {delete [] ptr;});
+        ImageData imd(data, dims, Encoding::RGB);
+
+        // Decode JPEG
+        CPPUNIT_ASSERT_NO_THROW(encodeJPEG(imd));
+
+        CPPUNIT_ASSERT_EQUAL((int)Encoding::JPEG, imd.getEncoding());
+        CPPUNIT_ASSERT_EQUAL(false, imd.isIndexable());
+        CPPUNIT_ASSERT_EQUAL((size_t)3, imd.getDimensions().rank());
+        CPPUNIT_ASSERT_EQUAL(512ull, imd.getDimensions().x1());
+        CPPUNIT_ASSERT_EQUAL(512ull, imd.getDimensions().x2());
+        CPPUNIT_ASSERT_EQUAL(3ull, imd.getDimensions().x3());
+
+        // Save encoded image to file for testing with Python
+        std::ofstream ofs(outImage2, std::fstream::binary | std::fstream::trunc);
+        if (ofs) {
+            const NDArray& jpg_data = imd.getData();
+            const size_t jpg_length = jpg_data.byteSize();
+            ofs.write((char*)jpg_data.getData<unsigned char>(), jpg_length);
+            ofs.close();
+        }
+
+    } else {
+        // Could not open RAW test image
+        throw KARABO_IO_EXCEPTION("Could not open test image " + inImage2);
+    }
+
+    const std::string inImage3("src/tests/rgb16_test.raw"); // RGB16 data
+    const std::string outImage3("src/tests/rgb16_test.jpg");
+
+    std::ifstream ifs3(inImage3, std::fstream::binary);
+    if (ifs3) {
+        // Get length of file
+        ifs3.seekg(0, ifs3.end);
+        const size_t length = ifs3.tellg();
+        ifs3.seekg(0, ifs3.beg);
+
+        char* buffer = new char[length];
+
+        // Read file in memory
+        ifs3.read(buffer, length);
+        ifs3.close();
+
+        // Create ImageData (no copy)
+        Dims dims(512, 512, 3);
+        NDArray data((unsigned short*)buffer, length / sizeof(unsigned short),
+            [](char* ptr) {delete [] ptr;}, dims);
+        ImageData imd(data, Encoding::RGB);
+
+        // Decode JPEG
+        CPPUNIT_ASSERT_NO_THROW(encodeJPEG(imd));
+
+        CPPUNIT_ASSERT_EQUAL((int)Encoding::JPEG, imd.getEncoding());
+        CPPUNIT_ASSERT_EQUAL(false, imd.isIndexable());
+        CPPUNIT_ASSERT_EQUAL((size_t)3, imd.getDimensions().rank());
+        CPPUNIT_ASSERT_EQUAL(512ull, imd.getDimensions().x1());
+        CPPUNIT_ASSERT_EQUAL(512ull, imd.getDimensions().x2());
+        CPPUNIT_ASSERT_EQUAL(3ull, imd.getDimensions().x3());
+
+        // Save encoded image to file for testing with Python
+        std::ofstream ofs(outImage3, std::fstream::binary | std::fstream::trunc);
+        if (ofs) {
+            const NDArray& jpg_data = imd.getData();
+            const size_t jpg_length = jpg_data.byteSize();
+            ofs.write((char*)jpg_data.getData<unsigned char>(), jpg_length);
+            ofs.close();
+        }
+
+    } else {
+        // Could not open RAW test image
+        throw KARABO_IO_EXCEPTION("Could not open test image " + inImage3);
+    }
+
+}
+
+void ImageSourceTest::shouldDecodeJpeg() {
+    using namespace karabo::util;
+    using namespace karabo::xms;
+
+    const std::string inImage1("src/tests/gray_test.jpg"); // created by previous test
+    const std::string outImage1("src/tests/gray_test.raw");
+
+    std::ifstream ifs1(inImage1, std::fstream::binary);
+    if (ifs1) {
+        // Get length of file
+        ifs1.seekg(0, ifs1.end);
+        const size_t length = ifs1.tellg();
+        ifs1.seekg(0, ifs1.beg);
+
+        char* buffer = new char[length];
+
+        // Read file in memory
+        ifs1.read(buffer, length);
+        ifs1.close();
+
+        // Create ImageData (no copy)
+        Dims dims(512, 512);
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) {delete [] ptr;});
+        ImageData imd(data, dims, Encoding::JPEG);
+
+        // Decode JPEG
+        CPPUNIT_ASSERT_NO_THROW(decodeJPEG(imd));
+
+        CPPUNIT_ASSERT_EQUAL((int)Encoding::GRAY, imd.getEncoding());
+        CPPUNIT_ASSERT_EQUAL(true, imd.isIndexable());
+        CPPUNIT_ASSERT_EQUAL((size_t)2, imd.getDimensions().rank());
+        CPPUNIT_ASSERT_EQUAL(512ull, imd.getDimensions().x1());
+        CPPUNIT_ASSERT_EQUAL(512ull, imd.getDimensions().x2());
+
+        // Save decoded image to file for testing with Python
+        std::ofstream ofs(outImage1, std::fstream::binary | std::fstream::trunc);
+        if (ofs) {
+            const NDArray& rgb_data = imd.getData();
+            const size_t rgb_length = rgb_data.byteSize();
+            ofs.write((char*)rgb_data.getData<unsigned char>(), rgb_length);
+            ofs.close();
+        }
+
+    } else {
+        // Could not open JPEG test image
+        throw KARABO_IO_EXCEPTION("Could not open test image " + inImage1);
+    }
+
+    const std::string inImage2("src/tests/rgb_test.jpg"); // created by previous test
+    const std::string outImage2("src/tests/rgb_test.raw");
+
+    std::ifstream ifs2(inImage2, std::fstream::binary);
+    if (ifs1) {
+        // Get length of file
+        ifs2.seekg(0, ifs2.end);
+        const size_t length = ifs2.tellg();
+        ifs2.seekg(0, ifs2.beg);
+
+        char* buffer = new char[length];
+
+        // Read file in memory
+        ifs2.read(buffer, length);
+        ifs2.close();
+
+        // Create ImageData (no copy)
+        Dims dims(512, 512, 3);
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) {delete [] ptr;});
+        ImageData imd(data, dims, Encoding::JPEG);
+
+        // Decode JPEG
+        CPPUNIT_ASSERT_NO_THROW(decodeJPEG(imd));
+
+        //CPPUNIT_ASSERT_EQUAL((int)Encoding::RGB, imd.getEncoding());
+        CPPUNIT_ASSERT_EQUAL(true, imd.isIndexable());
+        CPPUNIT_ASSERT_EQUAL((size_t)3, imd.getDimensions().rank());
+        CPPUNIT_ASSERT_EQUAL(512ull, imd.getDimensions().x1());
+        CPPUNIT_ASSERT_EQUAL(512ull, imd.getDimensions().x2());
+        CPPUNIT_ASSERT_EQUAL(3ull, imd.getDimensions().x3());
+
+        // Save decoded image to file for testing with Python
+        std::ofstream ofs(outImage2, std::fstream::binary | std::fstream::trunc);
+        if (ofs) {
+            const NDArray& rgb_data = imd.getData();
+            const size_t rgb_length = rgb_data.byteSize();
+            ofs.write((char*)rgb_data.getData<unsigned char>(), rgb_length);
+            ofs.close();
+        }
+
+    } else {
+        // Could not open JPEG test image
+        throw KARABO_IO_EXCEPTION("Could not open test image " + inImage2);
+    }
+
+}

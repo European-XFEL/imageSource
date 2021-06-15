@@ -2,6 +2,7 @@ nbproject/private
 nbproject/Package-*.bash
 nbproject/Makefile-*.mk
 package/
+__pycache__/
 dist/
 build/
 .dep.inc

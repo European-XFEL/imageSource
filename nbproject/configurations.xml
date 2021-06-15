@@ -66,6 +66,7 @@
           </linkerDynSerch>
           <linkerLibItems>
             <linkerLibLibItem>karabo</linkerLibLibItem>
+            <linkerLibLibItem>jpeg</linkerLibLibItem>
             <linkerOptionItem>`pkg-config --libs karaboDependencies`</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
@@ -131,6 +132,7 @@
           </linkerDynSerch>
           <linkerLibItems>
             <linkerLibLibItem>karabo</linkerLibLibItem>
+            <linkerLibLibItem>jpeg</linkerLibLibItem>
             <linkerOptionItem>`pkg-config --libs karaboDependencies`</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
