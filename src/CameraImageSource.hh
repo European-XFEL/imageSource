@@ -32,11 +32,11 @@ namespace karabo {
         virtual ~CameraImageSource();
 
     private:
-        
-            // implement scene map protocol
-            using SceneFunction = boost::function<std::string()>;
-            using SceneMap = std::map<std::string, SceneFunction>;
-            SceneMap m_scenes;
+        // implement scene map protocol
+        using SceneFunction = boost::function<std::string()>;
+        using SceneMap = std::map<std::string, SceneFunction>;
+        SceneMap m_scenes;
+    protected:
             void requestScene(const karabo::util::Hash& update);
             void registerScene(const SceneFunction& sceneFunction, const std::string& funcName);
 
