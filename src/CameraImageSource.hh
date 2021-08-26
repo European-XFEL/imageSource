@@ -27,7 +27,7 @@ namespace karabo {
 
         static void expectedParameters(karabo::util::Schema& expected);
 
-        CameraImageSource(const karabo::util::Hash& config);
+        explicit CameraImageSource(const karabo::util::Hash& config);
 
         virtual ~CameraImageSource();
 
@@ -38,7 +38,7 @@ namespace karabo {
         SceneMap m_scenes;
 
     protected:
-        void requestScene(const karabo::util::Hash& update);
+        void requestScene(const karabo::util::Hash& params);
         void registerScene(const SceneFunction& sceneFunction, const std::string& funcName);
         // the main scene
         std::string scene();

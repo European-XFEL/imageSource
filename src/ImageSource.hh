@@ -25,7 +25,7 @@ namespace karabo {
 
         static void expectedParameters(karabo::util::Schema& expected);
 
-        ImageSource(const karabo::util::Hash& config);
+        explicit ImageSource(const karabo::util::Hash& config);
 
         virtual ~ImageSource();
 
