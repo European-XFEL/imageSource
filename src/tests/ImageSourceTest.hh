@@ -30,7 +30,6 @@ public:
     ImageSourceTest();
     virtual ~ImageSourceTest();
     void setUp();
-    void tearDown();
 
 private:
     void shouldCreateImageSource();

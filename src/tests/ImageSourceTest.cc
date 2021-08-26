@@ -24,9 +24,6 @@ void ImageSourceTest::setUp() {
     m_config.set("deviceId", "testdevice");
 }
 
-void ImageSourceTest::tearDown() {
-}
-
 void ImageSourceTest::shouldCreateImageSource() {
     BaseDevice::Pointer device = BaseDevice::create("ImageSource", m_config);
     CPPUNIT_ASSERT_EQUAL(string("ImageSource"), (device->getClassInfo()).getClassName());
