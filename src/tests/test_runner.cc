@@ -7,10 +7,10 @@
 
 #include <cppunit/BriefTestProgressListener.h>
 #include <cppunit/CompilerOutputter.h>
-#include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/TestResult.h>
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
+#include <cppunit/extensions/TestFactoryRegistry.h>
 
 int main() {
     // Create the event manager and test controller
@@ -35,3 +35,4 @@ int main() {
 
     return result.wasSuccessful() ? 0 : 1;
 }
+
