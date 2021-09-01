@@ -6,7 +6,7 @@
  */
 
 #ifndef IMAGESOURCETEST_HH
-#define	IMAGESOURCETEST_HH
+#define IMAGESOURCETEST_HH
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -45,5 +45,5 @@ private:
     karabo::util::Hash m_config;
 };
 
-#endif	/* IMAGESOURCETEST_HH */
+#endif /* IMAGESOURCETEST_HH */
 

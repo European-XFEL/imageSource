@@ -6,8 +6,8 @@
  */
 
 #include "ImageSourceTest.hh"
-#include "../ImageSource.hh"
 #include "../CameraImageSource.hh"
+#include "../ImageSource.hh"
 
 using namespace std;
 USING_KARABO_NAMESPACES;
@@ -145,10 +145,10 @@ void ImageSourceTest::shouldNotUnpackMonoXXp() {
     std::vector<uint16_t> unpackedData(2);
 
     CPPUNIT_ASSERT_THROW(unpackMonoXXp(packedData.data(), 2, 1, 8, unpackedData.data()),
-        karabo::util::ParameterException);
+                         karabo::util::ParameterException);
 
     CPPUNIT_ASSERT_THROW(unpackMonoXXp(packedData.data(), 2, 1, 16, unpackedData.data()),
-        karabo::util::ParameterException);
+                         karabo::util::ParameterException);
 }
 
 void ImageSourceTest::shouldEncodeJpeg() {
@@ -173,7 +173,9 @@ void ImageSourceTest::shouldEncodeJpeg() {
 
         // Create ImageData (no copy)
         Dims dims(512, 512);
-        NDArray data((unsigned char*)buffer, length, [](char* ptr) {delete [] ptr;});
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) {
+            delete[] ptr;
+        });
         ImageData imd(data, dims, Encoding::GRAY);
 
         // Decode JPEG
@@ -217,7 +219,9 @@ void ImageSourceTest::shouldEncodeJpeg() {
 
         // Create ImageData (no copy)
         Dims dims(512, 512, 3);
-        NDArray data((unsigned char*)buffer, length, [](char* ptr) {delete [] ptr;});
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) {
+            delete[] ptr;
+        });
         ImageData imd(data, dims, Encoding::RGB);
 
         // Decode JPEG
@@ -263,7 +267,10 @@ void ImageSourceTest::shouldEncodeJpeg() {
         // Create ImageData (no copy)
         Dims dims(512, 512, 3);
         NDArray data((unsigned short*)buffer, length / sizeof(unsigned short),
-            [](char* ptr) {delete [] ptr;}, dims);
+                     [](char* ptr) {
+                         delete[] ptr;
+                     },
+                     dims);
         ImageData imd(data, Encoding::RGB);
 
         // Decode JPEG
@@ -289,7 +296,6 @@ void ImageSourceTest::shouldEncodeJpeg() {
         // Could not open RAW test image
         throw KARABO_IO_EXCEPTION("Could not open test image " + inImage3);
     }
-
 }
 
 void ImageSourceTest::shouldDecodeJpeg() {
@@ -314,7 +320,9 @@ void ImageSourceTest::shouldDecodeJpeg() {
 
         // Create ImageData (no copy)
         Dims dims(512, 512);
-        NDArray data((unsigned char*)buffer, length, [](char* ptr) {delete [] ptr;});
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) {
+            delete[] ptr;
+        });
         ImageData imd(data, dims, Encoding::JPEG);
 
         // Decode JPEG
@@ -358,13 +366,15 @@ void ImageSourceTest::shouldDecodeJpeg() {
 
         // Create ImageData (no copy)
         Dims dims(512, 512, 3);
-        NDArray data((unsigned char*)buffer, length, [](char* ptr) {delete [] ptr;});
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) {
+            delete[] ptr;
+        });
         ImageData imd(data, dims, Encoding::JPEG);
 
         // Decode JPEG
         CPPUNIT_ASSERT_NO_THROW(decodeJPEG(imd));
 
-        //CPPUNIT_ASSERT_EQUAL((int)Encoding::RGB, imd.getEncoding());
+        // CPPUNIT_ASSERT_EQUAL((int)Encoding::RGB, imd.getEncoding());
         CPPUNIT_ASSERT_EQUAL(true, imd.isIndexable());
         CPPUNIT_ASSERT_EQUAL((size_t)3, imd.getDimensions().rank());
         CPPUNIT_ASSERT_EQUAL(512ull, imd.getDimensions().x1());
@@ -384,5 +394,5 @@ void ImageSourceTest::shouldDecodeJpeg() {
         // Could not open JPEG test image
         throw KARABO_IO_EXCEPTION("Could not open test image " + inImage2);
     }
-
 }
+

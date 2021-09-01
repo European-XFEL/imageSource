@@ -9,7 +9,7 @@
 #include <cstdio>
 
 extern "C" {
-    #include <jpeglib.h>
+#include <jpeglib.h>
 }
 
 #include "ImageSource.hh"
@@ -27,29 +27,28 @@ namespace karabo {
         Schema data;
 
         NODE_ELEMENT(data).key("data")
-                .displayedName("Data")
-                .setDaqDataType(DaqDataType::TRAIN)
-                .commit();
+            .displayedName("Data")
+            .setDaqDataType(DaqDataType::TRAIN)
+            .commit();
 
         IMAGEDATA(data).key("data.image")
-                .displayedName("Image")
-                // Set initial dummy values for DAQ
-                .setDimensions("0, 0")
-                .setType(Types::UINT16)
-                .setEncoding(Encoding::UNDEFINED)
-                .commit();
+            .displayedName("Image")
+            // Set initial dummy values for DAQ
+            .setDimensions("0, 0")
+            .setType(Types::UINT16)
+            .setEncoding(Encoding::UNDEFINED)
+            .commit();
 
         OUTPUT_CHANNEL(expected).key("output")
-                .displayedName("Output")
-                .dataSchema(data)
-                .commit();
+            .displayedName("Output")
+            .dataSchema(data)
+            .commit();
 
         // Second output channel for the DAQ
         OUTPUT_CHANNEL(expected).key("daqOutput")
-                .displayedName("DAQ Output")
-                .dataSchema(data)
-                .commit();
-
+            .displayedName("DAQ Output")
+            .dataSchema(data)
+            .commit();
     }
 
 
@@ -61,12 +60,13 @@ namespace karabo {
     }
 
     void ImageSource::updateOutputSchema(const std::vector<unsigned long long>& shape, const EncodingType& encoding,
-            const Types::ReferenceType& kType) {
+                                         const Types::ReferenceType& kType) {
         Schema schemaUpdate;
         this->schema_update_helper(schemaUpdate, "output", "Output", shape, encoding, kType);
 
         std::vector<unsigned long long> daqShape = shape;
-        std::reverse(daqShape.begin(), daqShape.end()); // NB DAQ wants fastest changing index first, e.g. (width, height) or (channel, width, height)
+        std::reverse(daqShape.begin(), daqShape.end()); // NB DAQ wants fastest changing index first, e.g. (width,
+                                                        // height) or (channel, width, height)
         this->schema_update_helper(schemaUpdate, "daqOutput", "DAQ Output", daqShape, encoding, kType);
 
         this->appendSchema(schemaUpdate);
@@ -74,31 +74,32 @@ namespace karabo {
 
 
     void ImageSource::schema_update_helper(Schema& schemaUpdate, const std::string& nodeKey,
-            const std::string& displayedName, const std::vector<unsigned long long>& shape, const EncodingType& encoding,
-            const Types::ReferenceType& kType) {
+                                           const std::string& displayedName,
+                                           const std::vector<unsigned long long>& shape, const EncodingType& encoding,
+                                           const Types::ReferenceType& kType) {
         Schema dataSchema;
         NODE_ELEMENT(dataSchema).key("data")
-                .displayedName("Data")
-                .setDaqDataType(DaqDataType::TRAIN)
-                .commit();
+            .displayedName("Data")
+            .setDaqDataType(DaqDataType::TRAIN)
+            .commit();
 
         IMAGEDATA(dataSchema).key("data.image")
-                .displayedName("Image")
-                .setDimensions(karabo::util::toString(shape))
-                .setType(kType)
-                .setEncoding(encoding)
-                .commit();
+            .displayedName("Image")
+            .setDimensions(karabo::util::toString(shape))
+            .setType(kType)
+            .setEncoding(encoding)
+            .commit();
 
         OUTPUT_CHANNEL(schemaUpdate).key(nodeKey)
-                .displayedName(displayedName)
-                .dataSchema(dataSchema)
-                .commit();
+            .displayedName(displayedName)
+            .dataSchema(dataSchema)
+            .commit();
     }
 
 
-    void ImageSource::writeChannels(const NDArray& data, const Dims& binning,
-            const unsigned short bpp, const EncodingType& encoding, const Dims& roiOffsets,
-            const Timestamp& timestamp, const Hash& header) {
+    void ImageSource::writeChannels(const NDArray& data, const Dims& binning, const unsigned short bpp,
+                                    const EncodingType& encoding, const Dims& roiOffsets, const Timestamp& timestamp,
+                                    const Hash& header) {
 
         karabo::xms::ImageData imageData(data, encoding);
         imageData.setBitsPerPixel(bpp);
@@ -125,18 +126,20 @@ namespace karabo {
     }
 
 
-    void util::unpackMono12Packed(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData) {
+    void util::unpackMono12Packed(const uint8_t* data, const uint32_t width, const uint32_t height,
+                                  uint16_t* unpackedData) {
         size_t idx = 0, px = 0, image_size = width * height;
-        while (px+1 < image_size) {
-            unpackedData[px] = (data[idx] << 4) | (data[idx+1] & 0xF);
-            unpackedData[px+1] = (data[idx+2] << 4) | (data[idx+1] >> 4);
+        while (px + 1 < image_size) {
+            unpackedData[px] = (data[idx] << 4) | (data[idx + 1] & 0xF);
+            unpackedData[px + 1] = (data[idx + 2] << 4) | (data[idx + 1] >> 4);
             idx += 3;
             px += 2;
         }
     }
 
 
-    void util::unpackMonoXXp(const uint8_t* data, const uint32_t width, const uint32_t height, const uint8_t bpp, uint16_t* unpackedData) {
+    void util::unpackMonoXXp(const uint8_t* data, const uint32_t width, const uint32_t height, const uint8_t bpp,
+                             uint16_t* unpackedData) {
         if (bpp < 9 || bpp > 15) {
             throw KARABO_PARAMETER_EXCEPTION("Invalid bpp value: " + std::to_string(bpp) + ". It must be in [9, 15].");
         }
@@ -224,7 +227,7 @@ namespace karabo {
         const Types::ReferenceType kType = arr.getType();
         std::shared_ptr<unsigned char[]> sdata;
         if (kType == Types::UINT8) {
-            sdata = std::shared_ptr<unsigned char[]>(arr.getData<unsigned char>(), [](unsigned char* p){});
+            sdata = std::shared_ptr<unsigned char[]>(arr.getData<unsigned char>(), [](unsigned char* p) {});
         } else if (kType == Types::UINT16) {
             const size_t pixels = arr.size();
             sdata = std::shared_ptr<unsigned char[]>(new unsigned char[pixels]);
@@ -240,8 +243,7 @@ namespace karabo {
                 }
             }
         } else {
-            throw KARABO_PARAMETER_EXCEPTION("Conversion from Type " + toString(kType)
-                + " is not implemented.");
+            throw KARABO_PARAMETER_EXCEPTION("Conversion from Type " + toString(kType) + " is not implemented.");
         }
 
         struct jpeg_compress_struct cinfo;
@@ -262,7 +264,7 @@ namespace karabo {
                 break;
             default:
                 throw KARABO_PARAMETER_EXCEPTION("Conversion from " + toString(encoding)
-                    + " to JPEG is not implemented.");
+                                                 + " to JPEG is not implemented.");
         }
 
         const Dims& dims = imd.getDimensions();
@@ -306,4 +308,5 @@ namespace karabo {
         imd.setEncoding(Encoding::JPEG);
         imd.setDimensions(dims);
     }
-}
+} // namespace karabo
+
