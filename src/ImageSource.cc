@@ -308,5 +308,147 @@ namespace karabo {
         imd.setEncoding(Encoding::JPEG);
         imd.setDimensions(dims);
     }
-} // namespace karabo
 
+
+    void util::rotateImage(karabo::xms::ImageData& imd, unsigned int angle, void* buffer) {
+
+        if (!imd.isIndexable()) {
+            throw KARABO_PARAMETER_EXCEPTION("Cannot rotate non-indexable image");
+        }
+
+        NDArray& arr = const_cast<NDArray&>(imd.getData()); // from 2.12 on, can remove the `const_cast`
+        const size_t itemSize = arr.itemSize();
+
+        switch (itemSize) {
+            case 1:
+                util::rotate_image<uint8_t>(arr, angle, buffer);
+                break;
+            case 2:
+                util::rotate_image<uint16_t>(arr, angle, buffer);
+                break;
+            case 4:
+                util::rotate_image<uint32_t>(arr, angle, buffer);
+                break;
+            // XXX Not supported by NDArray
+            // case 8:
+            //     util::rotate_image<uint64_t>(arr, angle, buffer);
+            //     break;
+            default:
+                const Types::ReferenceType kType = arr.getType();
+                throw KARABO_PARAMETER_EXCEPTION("Cannot rotate images of type " + std::to_string(kType));
+        }
+
+        if (angle == 90 || angle == 270) {
+            Dims roiOffsets = imd.getROIOffsets();
+            roiOffsets.reverse();
+            imd.setROIOffsets(roiOffsets);
+
+            Dims binning = imd.getBinning();
+            binning.reverse();
+            imd.setBinning(binning);
+
+            Dims dimensions = imd.getDimensions();
+            dimensions.reverse();
+            imd.setDimensions(dimensions);
+
+            const bool flipX = imd.getFlipX();
+            const bool flipY = imd.getFlipY();
+            imd.setFlipY(flipX);
+            imd.setFlipX(flipY);
+        }
+
+        int rotation = imd.getRotation();
+        if (rotation != Rotation::UNDEFINED) {
+            rotation = (rotation + angle) % 360;
+            switch(rotation) {
+                case 0:
+                    imd.setRotation(Rotation::ROT_0);
+                    break;
+                case 90:
+                    imd.setRotation(Rotation::ROT_90);
+                    break;
+                case 180:
+                    imd.setRotation(Rotation::ROT_180);
+                    break;
+                case 270:
+                    imd.setRotation(Rotation::ROT_270);
+                    break;
+                default:
+                    imd.setRotation(Rotation::UNDEFINED);
+            }
+        }
+    }
+
+    template <class T>
+    void util::rotate_image(karabo::util::NDArray& arr, unsigned int angle, void* buffer) {
+        const Dims shape = arr.getShape();
+        if (shape.rank() != 2) {
+            // XXX possibly extend to colour images
+            throw KARABO_NOT_IMPLEMENTED_EXCEPTION("Can only rotate monochromatic images");
+        }
+
+        T* data = arr.getData<T>();
+        const size_t width = shape.x2();
+        const size_t height = shape.x1();
+        const size_t size = shape.size();
+        const size_t byteSize = arr.byteSize();
+
+        if (angle == 0) {
+            // nothing to be done
+        } else if (angle == 90) {
+            T* data_copy;
+            if (buffer == nullptr) {
+                data_copy = new T[size];
+            } else {
+                data_copy = reinterpret_cast<T*>(buffer);
+            }
+            memcpy(data_copy, data, byteSize);
+
+            // XXX to be improved - slow for large images
+            for (size_t i = 0; i < width; ++i) {
+                for (size_t j = 0; j < height; ++j) {
+                    data[i * height + height - j - 1] = data_copy[j * width + i];
+                }
+            }
+
+            arr.setShape(Dims(width, height));
+            if (buffer == nullptr) {
+                delete [] data_copy;
+            }
+
+        } else if (angle == 180) {
+            T value;
+            for (size_t i = 0; i < size / 2; ++i) {
+                value = data[i];
+                data[i] = data[size - i - 1];
+                data[size - i - 1] = value;
+            }
+
+        } else if (angle == 270) {
+            T* data_copy;
+            if (buffer == nullptr) {
+                data_copy = new T[size];
+            } else {
+                data_copy = reinterpret_cast<T*>(buffer);
+            }
+            memcpy(data_copy, data, byteSize);
+
+            // XXX to be improved - slow for large images
+            for (size_t i = 0; i < width; ++i) {
+                for (size_t j = 0; j < height; ++j) {
+                    data[height * (width - i) + j - height] = data_copy[j * width + i];
+                }
+            }
+
+            arr.setShape(Dims(width, height));
+            if (buffer == nullptr) {
+                delete [] data_copy;
+            }
+
+        } else {
+            throw KARABO_PARAMETER_EXCEPTION("Invalid rotation angle: " + std::to_string(angle) +
+                ". It must be in {0, 90, 180, 270}.");
+        }
+    }
+
+} // namespace karabo
