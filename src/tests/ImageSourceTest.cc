@@ -396,3 +396,111 @@ void ImageSourceTest::shouldDecodeJpeg() {
     }
 }
 
+
+void ImageSourceTest::shouldRotate() {
+    using namespace karabo::util;
+    using namespace karabo::xms;
+
+    // Test 90 degrees rotation
+    {
+        uint8_t data_in[] = {
+            0x01, 0x02, 0x03, 0x04,
+            0x05, 0x06, 0x07, 0x08,
+            0x09, 0x0A, 0x0B, 0x0C};
+
+        uint8_t expected_data[] = {
+            0x09, 0x05, 0x01,
+            0x0A, 0x06, 0x02,
+            0x0B, 0x07, 0x03,
+            0x0C, 0x08, 0x04};
+
+        const Dims shape(3, 4);
+        NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
+        ImageData imd(arr_in);
+
+        rotateImage(imd, 90);
+
+        const NDArray& arr_out = imd.getData();
+        const uint8_t* data_out = arr_out.getData<uint8_t>();
+        CPPUNIT_ASSERT_EQUAL(shape.x2(), arr_out.getShape().x1());
+        CPPUNIT_ASSERT_EQUAL(shape.x1(), arr_out.getShape().x2());
+        CPPUNIT_ASSERT_EQUAL(shape.rank(), arr_out.getShape().rank());
+        CPPUNIT_ASSERT_EQUAL(int(Rotation::ROT_90), imd.getRotation());
+        for (size_t i = 0; i < 12; ++i) {
+            CPPUNIT_ASSERT_EQUAL(expected_data[i], data_out[i]);
+        }
+    }
+
+    // Test 180 degrees rotation
+    {
+        uint16_t data_in[] = {
+            0x01, 0x02, 0x03, 0x04,
+            0x05, 0x06, 0x07, 0x08,
+            0x09, 0x0A, 0x0B, 0x0C};
+
+        uint16_t expected_data[] = {
+            0x0C, 0x0B, 0x0A, 0x09,
+            0x08, 0x07, 0x06, 0x05,
+            0x04, 0x03, 0x02, 0x01};
+
+        const Dims shape(3, 4);
+        NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
+        ImageData imd(arr_in);
+        imd.setRotation(Rotation::ROT_90);
+
+        rotateImage(imd, 180);
+
+        const NDArray& arr_out = imd.getData();
+        const uint16_t* data_out = arr_out.getData<uint16_t>();
+        CPPUNIT_ASSERT_EQUAL(shape.x1(), arr_out.getShape().x1());
+        CPPUNIT_ASSERT_EQUAL(shape.x2(), arr_out.getShape().x2());
+        CPPUNIT_ASSERT_EQUAL(shape.rank(), arr_out.getShape().rank());
+        CPPUNIT_ASSERT_EQUAL(int(Rotation::ROT_270), imd.getRotation());
+        for (size_t i = 0; i < 12; ++i) {
+            CPPUNIT_ASSERT_EQUAL(expected_data[i], data_out[i]);
+        }
+    }
+
+    // Test 270 degrees rotation
+    {
+        uint32_t data_in[] = {
+            0x01, 0x02, 0x03, 0x04,
+            0x05, 0x06, 0x07, 0x08,
+            0x09, 0x0A, 0x0B, 0x0C};
+
+        uint32_t expected_data[] = {
+            0x04, 0x08, 0x0C,
+            0x03, 0x07, 0x0B,
+            0x02, 0x06, 0x0A,
+            0x01, 0x05, 0x09};
+
+        const Dims shape(3, 4);
+        uint32_t buffer[shape.size()];
+        NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
+        ImageData imd(arr_in);
+        imd.setRotation(Rotation::ROT_180);
+
+        rotateImage(imd, 270, reinterpret_cast<void*>(buffer));
+
+        const NDArray& arr_out = imd.getData();
+        const uint32_t* data_out = arr_out.getData<uint32_t>();
+        CPPUNIT_ASSERT_EQUAL(shape.x2(), arr_out.getShape().x1());
+        CPPUNIT_ASSERT_EQUAL(shape.x1(), arr_out.getShape().x2()); 
+        CPPUNIT_ASSERT_EQUAL(shape.rank(), arr_out.getShape().rank());
+        CPPUNIT_ASSERT_EQUAL(int(Rotation::ROT_90), imd.getRotation());
+        for (size_t i = 0; i < 12; ++i) {
+            CPPUNIT_ASSERT_EQUAL(expected_data[i], data_out[i]);
+        }
+    }
+
+    {
+        uint8_t data_in[] = {0x01, 0x02, 0x03, 0x04,
+                             0x05, 0x06, 0x07, 0x08,
+                             0x09, 0x0A, 0x0B, 0x0C};
+        const Dims shape(3, 4);
+        NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
+        ImageData imd(arr_in);
+
+        CPPUNIT_ASSERT_THROW(rotateImage(imd, 1), karabo::util::ParameterException);
+    }
+}

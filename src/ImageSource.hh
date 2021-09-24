@@ -153,11 +153,37 @@ namespace karabo {
          * @brief Encode a GRAY image to JPEG.
          *
          * @param imd The ImageData object - encoded as JPEG - to be decoded as GRAY
-         * @parame quality The compression quality. Levels of 90% or higher are considered "high
+         * @param quality The compression quality. Levels of 90% or higher are considered "high
          * quality", 80-90% is "medium quality", 70-80% is "low quality".
-         * @comment An optional comment to be added to the JPEG image. Its maximum length is 65533 Bytes.
+         * @param comment An optional comment to be added to the JPEG image. Its maximum length is 65533 Bytes.
          */
         void encodeJPEG(karabo::xms::ImageData& imd, unsigned int quality = 100, const std::string& comment = "");
+
+        /**
+         * @brief Rotate an image by 90, 180 or 270 degrees.
+         *
+         * @param imd The ImageData object - to be rotated.
+         * @param angle The rotation angle. Allowed values are: 0, 90, 180, 270 degrees.
+         * @param buffer An optional buffer, to be used for image rotation. Its size must be at
+         * least (width * height * bytesPerPixel). If a null pointer is passed, than the buffer
+         * is allocated internally in the function.
+         * 
+         */
+        void rotateImage(karabo::xms::ImageData& imd, unsigned int angle, void* buffer=nullptr);
+
+        /**
+         * @brief Rotate an image by 90, 180 or 270 degrees.
+         *
+         * @param T The pixel data type, e.g. uint16_t.
+         * @param arr The NDArray object - to be rotated.
+         * @param angle The rotation angle. Allowed values are: 0, 90, 180, 270 degrees.
+         * @param buffer An optional buffer, to be used for image rotation. Its size must be at
+         * least (width * height * bytesPerPixel). If a null pointer is passed, than the buffer
+         * is allocated internally in the function.
+         * 
+         */
+        template <class T>
+        void rotate_image(karabo::util::NDArray& arr, unsigned int angle, void* buffer=nullptr);
 
     } // namespace util
 } // namespace karabo
