@@ -12,6 +12,8 @@ extern "C" {
 #include <jpeglib.h>
 }
 
+#include <opencv2/core.hpp>
+
 #include "ImageSource.hh"
 
 using namespace std;
@@ -58,6 +60,7 @@ namespace karabo {
 
     ImageSource::~ImageSource() {
     }
+
 
     void ImageSource::updateOutputSchema(const std::vector<unsigned long long>& shape, const EncodingType& encoding,
                                          const Types::ReferenceType& kType) {
@@ -379,12 +382,158 @@ namespace karabo {
         }
     }
 
+
     template <class T>
     void util::rotate_image(karabo::util::NDArray& arr, unsigned int angle, void* buffer) {
+        int type;
+        switch(sizeof(T)) {
+            case 1:
+                type = CV_8UC1;
+                break;
+            case 2:
+                type = CV_16UC1;
+                break;
+            case 4:
+                type = CV_32SC1;
+                break;
+            default:
+                throw KARABO_NOT_IMPLEMENTED_EXCEPTION("CV Cannot handle data type of size "
+                                                       + std::to_string(sizeof(T)));
+        }
+
         const Dims shape = arr.getShape();
         if (shape.rank() != 2) {
             // XXX possibly extend to colour images
             throw KARABO_NOT_IMPLEMENTED_EXCEPTION("Can only rotate monochromatic images");
+        }
+
+        const size_t width = shape.x2();
+        const size_t height = shape.x1();
+        const size_t size = shape.size();
+        const size_t byteSize = arr.byteSize();
+
+        int rotateCode;
+        size_t width_out;
+        size_t height_out;
+        switch(angle) {
+            case 0:
+                // nothing to be done
+                return;
+                break;
+            case 90:
+                rotateCode = cv::ROTATE_90_CLOCKWISE;
+                width_out = height;
+                height_out = width;
+                break;
+            case 180:
+                rotateCode = cv::ROTATE_180;
+                width_out = width;
+                height_out = height;
+                break;
+            case 270:
+                rotateCode = cv::ROTATE_90_COUNTERCLOCKWISE;
+                width_out = height;
+                height_out = width;
+                break;
+            default:
+                throw KARABO_PARAMETER_EXCEPTION("Invalid rotation angle: " + std::to_string(angle) +
+                                                 ". It must be in {0, 90, 180, 270}.");
+        }
+
+        T* data = arr.getData<T>();
+        T* data_copy;
+        if (buffer == nullptr) {
+            data_copy = new T[size];
+        } else {
+            data_copy = reinterpret_cast<T*>(buffer);
+        }
+        memcpy(data_copy, data, byteSize);
+
+        cv::Mat in(height, width, type, (void*)data_copy);
+        cv::Mat out(height_out, width_out, type, (void*)data);
+        cv::rotate(in, out, rotateCode);
+
+        arr.setShape(Dims(height_out, width_out));
+        if (buffer == nullptr) {
+            delete [] data_copy;
+        }
+    }
+
+
+    void util::flipImage(karabo::xms::ImageData& imd, bool flipX, bool flipY, void* buffer) {
+
+        if (!imd.isIndexable()) {
+            throw KARABO_PARAMETER_EXCEPTION("Cannot flip non-indexable image");
+        }
+
+        NDArray& arr = const_cast<NDArray&>(imd.getData()); // from 2.12 on, can remove the `const_cast`
+        const size_t itemSize = arr.itemSize();
+
+        switch (itemSize) {
+            case 1:
+                util::flip_image<uint8_t>(arr, flipX, flipY, buffer);
+                break;
+            case 2:
+                util::flip_image<uint16_t>(arr, flipX, flipY, buffer);
+                break;
+            case 4:
+                util::flip_image<uint32_t>(arr, flipX, flipY, buffer);
+                break;
+            // XXX Not supported by NDArray
+            // case 8:
+            //     util::flip_image<uint64_t>(arr, flipX, flipY, buffer);
+            //     break;
+            default:
+                const Types::ReferenceType kType = arr.getType();
+                throw KARABO_PARAMETER_EXCEPTION("Cannot flip images of type " + std::to_string(kType));
+        }
+
+        if (flipX) {
+            imd.setFlipX(!imd.getFlipX());
+        }
+
+        if (flipY) {
+            imd.setFlipY(!imd.getFlipY());
+        }
+    }
+
+
+    template <class T>
+    void util::flip_image(karabo::util::NDArray& arr, bool flipX, bool flipY, void* buffer) {
+        int type;
+        switch(sizeof(T)) {
+            case 1:
+                type = CV_8UC1;
+                break;
+            case 2:
+                type = CV_16UC1;
+                break;
+            case 4:
+                type = CV_32SC1;
+                break;
+            default:
+                throw KARABO_NOT_IMPLEMENTED_EXCEPTION("CV Cannot handle data type of size "
+                                                       + std::to_string(sizeof(T)));
+        }
+
+        const Dims shape = arr.getShape();
+        if (shape.rank() != 2) {
+            // XXX possibly extend to colour images
+            throw KARABO_NOT_IMPLEMENTED_EXCEPTION("Can only flip monochromatic images");
+        }
+
+        int flipCode;
+        if (flipX && flipY) {
+            flipCode = -1;
+        } else if (flipX) {
+            // Swap columns, i.e. flip around the the y-axis
+            flipCode = 1;
+        } else if (flipY) {
+            // Swap rows, i.e. flip around the x-axis
+            flipCode = 0;
+        } else {
+            // Nothing to be done
+            return;
         }
 
         T* data = arr.getData<T>();
@@ -393,61 +542,20 @@ namespace karabo {
         const size_t size = shape.size();
         const size_t byteSize = arr.byteSize();
 
-        if (angle == 0) {
-            // nothing to be done
-        } else if (angle == 90) {
-            T* data_copy;
-            if (buffer == nullptr) {
-                data_copy = new T[size];
-            } else {
-                data_copy = reinterpret_cast<T*>(buffer);
-            }
-            memcpy(data_copy, data, byteSize);
-
-            // XXX to be improved - slow for large images
-            for (size_t i = 0; i < width; ++i) {
-                for (size_t j = 0; j < height; ++j) {
-                    data[i * height + height - j - 1] = data_copy[j * width + i];
-                }
-            }
-
-            arr.setShape(Dims(width, height));
-            if (buffer == nullptr) {
-                delete [] data_copy;
-            }
-
-        } else if (angle == 180) {
-            T value;
-            for (size_t i = 0; i < size / 2; ++i) {
-                value = data[i];
-                data[i] = data[size - i - 1];
-                data[size - i - 1] = value;
-            }
-
-        } else if (angle == 270) {
-            T* data_copy;
-            if (buffer == nullptr) {
-                data_copy = new T[size];
-            } else {
-                data_copy = reinterpret_cast<T*>(buffer);
-            }
-            memcpy(data_copy, data, byteSize);
-
-            // XXX to be improved - slow for large images
-            for (size_t i = 0; i < width; ++i) {
-                for (size_t j = 0; j < height; ++j) {
-                    data[height * (width - i) + j - height] = data_copy[j * width + i];
-                }
-            }
-
-            arr.setShape(Dims(width, height));
-            if (buffer == nullptr) {
-                delete [] data_copy;
-            }
-
+        T* data_copy;
+        if (buffer == nullptr) {
+            data_copy = new T[size];
         } else {
-            throw KARABO_PARAMETER_EXCEPTION("Invalid rotation angle: " + std::to_string(angle) +
-                ". It must be in {0, 90, 180, 270}.");
+            data_copy = reinterpret_cast<T*>(buffer);
+        }
+        memcpy(data_copy, data, byteSize);
+
+        cv::Mat in(height, width, type, (void*)data_copy);
+        cv::Mat out(height, width, type, (void*)data);
+        cv::flip(in, out, flipCode);
+
+        if (buffer == nullptr) {
+            delete [] data_copy;
         }
     }
 

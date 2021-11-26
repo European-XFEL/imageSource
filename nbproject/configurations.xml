@@ -52,6 +52,7 @@
           <incDir>
             <pElem>${KARABO}/include</pElem>
             <pElem>${KARABO}/extern/include</pElem>
+            <pElem>${KARABO}/extern/include/opencv4</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
@@ -59,14 +60,18 @@
           <linkerAddLib>
             <pElem>${KARABO}/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
+            <pElem>${KARABO}/extern/lib64</pElem>
           </linkerAddLib>
           <linkerDynSerch>
             <pElem>${KARABO}/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
+            <pElem>${KARABO}/extern/lib64</pElem>
           </linkerDynSerch>
           <linkerLibItems>
             <linkerLibLibItem>karabo</linkerLibLibItem>
             <linkerLibLibItem>jpeg</linkerLibLibItem>
+            <linkerLibLibItem>opencv_imgproc</linkerLibLibItem>
+            <linkerLibLibItem>opencv_core</linkerLibLibItem>
             <linkerOptionItem>`pkg-config --libs karaboDependencies`</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
@@ -112,6 +117,7 @@
           <incDir>
             <pElem>${KARABO}/include</pElem>
             <pElem>${KARABO}/extern/include</pElem>
+            <pElem>${KARABO}/extern/include/opencv4</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -125,14 +131,18 @@
           <linkerAddLib>
             <pElem>${KARABO}/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
+            <pElem>${KARABO}/extern/lib64</pElem>
           </linkerAddLib>
           <linkerDynSerch>
             <pElem>${KARABO}/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
+            <pElem>${KARABO}/extern/lib64</pElem>
           </linkerDynSerch>
           <linkerLibItems>
             <linkerLibLibItem>karabo</linkerLibLibItem>
             <linkerLibLibItem>jpeg</linkerLibLibItem>
+            <linkerLibLibItem>opencv_imgproc</linkerLibLibItem>
+            <linkerLibLibItem>opencv_core</linkerLibLibItem>
             <linkerOptionItem>`pkg-config --libs karaboDependencies`</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
