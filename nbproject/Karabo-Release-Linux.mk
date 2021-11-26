@@ -50,8 +50,8 @@ TESTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-std=c++14
+CXXFLAGS=-std=c++14
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -73,17 +73,17 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libimageSource.${CND_DLIB_EXT}: ${OBJ
 ${OBJECTDIR}/src/CameraImageSource.o: src/CameraImageSource.cc 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/CameraImageSource.o src/CameraImageSource.cc
+	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies`   -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/CameraImageSource.o src/CameraImageSource.cc
 
 ${OBJECTDIR}/src/ImageSource.o: src/ImageSource.cc 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ImageSource.o src/ImageSource.cc
+	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies`   -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ImageSource.o src/ImageSource.cc
 
 ${OBJECTDIR}/src/Scene.o: src/Scene.cc 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Scene.o src/Scene.cc
+	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies`   -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Scene.o src/Scene.cc
 
 # Subprojects
 .build-subprojects:
@@ -98,13 +98,13 @@ ${TESTDIR}/TestFiles/f1: ${TESTDIR}/src/tests/ImageSourceTest.o ${TESTDIR}/src/t
 ${TESTDIR}/src/tests/ImageSourceTest.o: src/tests/ImageSourceTest.cc 
 	${MKDIR} -p ${TESTDIR}/src/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies` -std=c++11  -MMD -MP -MF "$@.d" -o ${TESTDIR}/src/tests/ImageSourceTest.o src/tests/ImageSourceTest.cc
+	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies`   -MMD -MP -MF "$@.d" -o ${TESTDIR}/src/tests/ImageSourceTest.o src/tests/ImageSourceTest.cc
 
 
 ${TESTDIR}/src/tests/test_runner.o: src/tests/test_runner.cc 
 	${MKDIR} -p ${TESTDIR}/src/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies` -std=c++11  -MMD -MP -MF "$@.d" -o ${TESTDIR}/src/tests/test_runner.o src/tests/test_runner.cc
+	$(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies`   -MMD -MP -MF "$@.d" -o ${TESTDIR}/src/tests/test_runner.o src/tests/test_runner.cc
 
 
 ${OBJECTDIR}/src/CameraImageSource_nomain.o: ${OBJECTDIR}/src/CameraImageSource.o src/CameraImageSource.cc 
@@ -115,7 +115,7 @@ ${OBJECTDIR}/src/CameraImageSource_nomain.o: ${OBJECTDIR}/src/CameraImageSource.
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/CameraImageSource_nomain.o src/CameraImageSource.cc;\
+	    $(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies`   -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/CameraImageSource_nomain.o src/CameraImageSource.cc;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/CameraImageSource.o ${OBJECTDIR}/src/CameraImageSource_nomain.o;\
 	fi
@@ -128,7 +128,7 @@ ${OBJECTDIR}/src/ImageSource_nomain.o: ${OBJECTDIR}/src/ImageSource.o src/ImageS
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ImageSource_nomain.o src/ImageSource.cc;\
+	    $(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies`   -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ImageSource_nomain.o src/ImageSource.cc;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/ImageSource.o ${OBJECTDIR}/src/ImageSource_nomain.o;\
 	fi
@@ -141,7 +141,7 @@ ${OBJECTDIR}/src/Scene_nomain.o: ${OBJECTDIR}/src/Scene.o src/Scene.cc
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Scene_nomain.o src/Scene.cc;\
+	    $(COMPILE.cc) -O2 -I${KARABO}/include -I${KARABO}/extern/include -I${KARABO}/extern/include/opencv4 `pkg-config --cflags karaboDependencies`   -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Scene_nomain.o src/Scene.cc;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/Scene.o ${OBJECTDIR}/src/Scene_nomain.o;\
 	fi
