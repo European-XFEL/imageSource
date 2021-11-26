@@ -174,7 +174,7 @@ namespace karabo {
         // The array which we assign the decoded JPEG stream to
         NDArray ndarr(imd.getDimensions(), Types::UINT8);
 
-        NDArray& arr = const_cast<NDArray&>(imd.getData()); // from 2.12 on, can remove the `const_cast`
+        NDArray& arr = imd.getData();
         unsigned char* cdata = arr.getData<unsigned char>();
         struct jpeg_decompress_struct cinfo;
         struct jpeg_error_mgr jerr;
@@ -225,7 +225,7 @@ namespace karabo {
 
 
     void util::encodeJPEG(karabo::xms::ImageData& imd, unsigned int quality, const std::string& comment) {
-        NDArray& arr = const_cast<NDArray&>(imd.getData()); // from 2.12 on, can remove the `const_cast`
+        NDArray& arr = imd.getData();
 
         const Types::ReferenceType kType = arr.getType();
         std::shared_ptr<unsigned char[]> sdata;
