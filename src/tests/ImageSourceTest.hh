@@ -24,6 +24,7 @@ class ImageSourceTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(shouldEncodeJpeg);
     CPPUNIT_TEST(shouldDecodeJpeg);
     CPPUNIT_TEST(shouldRotate);
+    CPPUNIT_TEST(shouldFlip);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -42,6 +43,7 @@ private:
     void shouldEncodeJpeg();
     void shouldDecodeJpeg();
     void shouldRotate();
+    void shouldFlip();
 
 private:
     karabo::util::Hash m_config;

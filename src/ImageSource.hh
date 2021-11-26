@@ -185,6 +185,34 @@ namespace karabo {
         template <class T>
         void rotate_image(karabo::util::NDArray& arr, unsigned int angle, void* buffer=nullptr);
 
+        /**
+         * @brief Flip an image in X and/or Y.
+         *
+         * @param imd The ImageData object - to be rotated.
+         * @param flipX If this is true, the image will be flipped in the horizontal direction.
+         * @param flipY If this is true, the image will be flipped in the vertical direction.
+         * @param buffer An optional buffer, to be used for image flip. Its size must be at least
+         * (width * height * bytesPerPixel). If a null pointer is passed, than the buffer is
+         * allocated internally in the function.
+         * 
+         */
+        void flipImage(karabo::xms::ImageData& imd, bool flipX, bool flipY, void* buffer=nullptr);
+
+        /**
+         * @brief Flip an image in X and/or Y.
+         *
+         * @param T The pixel data type, e.g. uint16_t.
+         * @param arr The NDArray object - to be rotated.
+         * @param flipX If this is true, the image will be flipped in the horizontal direction.
+         * @param flipY If this is true, the image will be flipped in the vertical direction.
+         * @param buffer An optional buffer, to be used for image flip. Its size must be at least
+         * (width * height * bytesPerPixel). If a null pointer is passed, than the buffer is
+         * allocated internally in the function.
+         * 
+         */
+        template <class T>
+        void flip_image(karabo::util::NDArray& arr, bool flipX, bool flipY, void* buffer=nullptr);
+
     } // namespace util
 } // namespace karabo
 
