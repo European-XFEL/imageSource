@@ -12,7 +12,7 @@ stages:
     - export REL_BUILD_DIR=$CI_PROJECT_DIR/dist/Release/GNU-Linux-x86/
     - export REL_ARTIFACT_DEST=karaboDevices/$REL_PROJECT_NAME/tags/$REL_TAG
     - export REL_ARTIFACT_NAME=libaravisCameras-$REL_TAG-$REL_OS_NAME-$REL_OS_VERS_LONG.so
-    - export KARABO_TAG="latest_build"
+    - export KARABO_TAG="2.11.4"  # XXX "latest_build"
     - curl http://exflserv05.desy.de/karabo/karaboFramework/tags/$KARABO_TAG/karabo-$KARABO_TAG-Release-$REL_OS_NAME-$REL_OS_VERS_LONG-x86_64.sh > karabo.sh
     - bash karabo.sh --prefix=/root
     - source /root/karabo/activate
