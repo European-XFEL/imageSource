@@ -36,7 +36,8 @@ namespace karabo {
         IMAGEDATA(data).key("data.image")
             .displayedName("Image")
             // Set initial dummy values for DAQ
-            .setDimensions("0, 0")
+            .setDimensions("0, 0") // from 2.16.0 onwards better do: .setDimensions({0, 0})
+
             .setType(Types::UINT16)
             .setEncoding(Encoding::UNDEFINED)
             .commit();
@@ -54,7 +55,10 @@ namespace karabo {
     }
 
 
-    ImageSource::ImageSource(const karabo::util::Hash& config) : Device<>(config) {
+    ImageSource::ImageSource(const karabo::util::Hash& config) : Device<>(config),
+            m_shape(config.get<std::vector<unsigned long long>>("output.schema.data.image.dims")),
+            m_encoding(config.get<int>("output.schema.data.image.encoding")),
+            m_kType(config.get<int>("output.schema.data.image.pixels.type")) {
     }
 
 
@@ -64,6 +68,15 @@ namespace karabo {
 
     void ImageSource::updateOutputSchema(const std::vector<unsigned long long>& shape, const EncodingType& encoding,
                                          const Types::ReferenceType& kType) {
+
+        boost::mutex::scoped_lock lock(m_updateSchemaMtx);
+
+        if (shape == m_shape && encoding == m_encoding && kType == m_kType) {
+            // Nothing to be updated
+            KARABO_LOG_FRAMEWORK_DEBUG << "No need to update the output schema";
+            return;
+        }
+
         Schema schemaUpdate;
         this->schema_update_helper(schemaUpdate, "output", "Output", shape, encoding, kType);
 
@@ -73,6 +86,10 @@ namespace karabo {
         this->schema_update_helper(schemaUpdate, "daqOutput", "DAQ Output", daqShape, encoding, kType);
 
         this->appendSchema(schemaUpdate);
+
+        m_shape = shape;
+        m_encoding = encoding;
+        m_kType = kType;
     }
 
 
