@@ -9,8 +9,8 @@ class Jpeg_TestCase(unittest.TestCase):
         for fname in (("4.2.03.raw", "rgb_test.jpg"),  # RGB image
                       ("gray21.512.raw", "gray_test.jpg")):  # GRAY image
 
-            in_file = f"src/tests/{fname[0]}"  # RGB or GRAY image
-            out_file = f"src/tests/{fname[1]}"  # compressed image
+            in_file = f"src/test/{fname[0]}"  # RGB or GRAY image
+            out_file = f"src/test/{fname[1]}"  # compressed image
 
             image2 = Image.open(out_file)
             data2 = np.array(image2)
@@ -24,8 +24,8 @@ class Jpeg_TestCase(unittest.TestCase):
             self.assertLess(np.sum(diff > 10) / data1.size, 0.10)
 
     def test_encode_rgb16(self):
-        in_file = "src/tests/rgb16_test.raw"  # RGB16 image
-        out_file = "src/tests/rgb16_test.jpg"  # compressed image
+        in_file = "src/test/rgb16_test.raw"  # RGB16 image
+        out_file = "src/test/rgb16_test.jpg"  # compressed image
 
         image2 = Image.open(out_file)
         data2 = np.array(image2)
@@ -44,8 +44,8 @@ class Jpeg_TestCase(unittest.TestCase):
         for fname in (("rgb_test.jpg", "rgb_test.raw"),  # RGB image
                       ("gray_test.jpg", "gray_test.raw")):  # GRAY image
 
-            in_file = f"src/tests/{fname[0]}"  # JPEG image
-            out_file = f"src/tests/{fname[1]}"  # uncompressed image
+            in_file = f"src/test/{fname[0]}"  # JPEG image
+            out_file = f"src/test/{fname[1]}"  # uncompressed image
 
             image1 = Image.open(in_file)
             data1 = np.array(image1)
