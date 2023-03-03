@@ -3,6 +3,13 @@ add_library (
 )
 
 find_package(Threads REQUIRED)
+find_package(OpenCV REQUIRED)
+
+set(TARGET_HEADERS
+    CameraImageSource.hh
+    ImageSource.hh
+    version.hh
+)
 
 target_sources(
     ${CMAKE_PROJECT_NAME}
@@ -26,7 +33,6 @@ target_include_directories(
     ${CMAKE_PROJECT_NAME} SYSTEM
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    $ENV{KARABO}/extern/include/opencv4
  )
 
 target_link_libraries(
@@ -34,9 +40,8 @@ target_link_libraries(
     PUBLIC
     Threads::Threads
     ${KARABO_LIB_TARGET_NAME}
-    jpeg
-    $ENV{KARABO}/extern/lib64/libopencv_imgproc.so
-    $ENV{KARABO}/extern/lib64/libopencv_core.so
+    opencv::opencv_core_alias
+    opencv::opencv_imgproc_alias
 )
 
 # Finds Git - it will be used by the custom command that generates version.hh
@@ -70,6 +75,16 @@ add_custom_target(
 
 add_dependencies(${CMAKE_PROJECT_NAME} UpdateVersionHeader)
 
+# install public header files
+set_target_properties(
+    ${CMAKE_PROJECT_NAME}
+    PROPERTIES PUBLIC_HEADER "${TARGET_HEADERS}")
+
+# install the target (library files)
+install(TARGETS ${CMAKE_PROJECT_NAME}
+    LIBRARY DESTINATION "plugins"
+    PUBLIC_HEADER DESTINATION "include/image_source")
+
 if (BUILD_TESTS)
 
     enable_testing()
@@ -94,6 +109,7 @@ if (BUILD_TESTS)
         test-${CMAKE_PROJECT_NAME}
         PRIVATE
         Threads::Threads
+        ${KARABO_LIB_TARGET_NAME}
         ${CMAKE_PROJECT_NAME}
         ${gtest_LIB}
     )
