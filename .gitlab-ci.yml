@@ -1,5 +1,7 @@
 stages:
   - build
+  - test
+  - package
 
 # determine conan recipe string from CI_COMMIT_TAG
 create_variables:
@@ -32,13 +34,11 @@ create_variables:
     reports:
       dotenv: dotenv.txt
 
-# build template
-.build_template: &build_it
-  stage: build
+# define common actions for the build/test/package environment
+.conan_setup_script:
   variables:
     KARABO_TAG:          $CONAN_RECIPE_CHANNEL
-    KARABO_BROKER_TOPIC: "gitlab_ci_$CI_JOB_ID"
-  script:
+  before_script:
     # setup conan build profile
     - conan profile new default --detect || true > /dev/null
     - conan profile update settings.compiler.libcxx=libstdc++11 default
@@ -49,22 +49,58 @@ create_variables:
     - conan install karaboFramework/$KARABO_TAG@karaboDevices+depends/any --install-folder $HOME/karabo --remote=gitlab > /dev/null
     - source $HOME/karabo/activate
     - pushd $CI_PROJECT_DIR
+
+
+# build template
+.build_template: &build_it
+  stage: build
+  extends: .conan_setup_script
+  script:
     # commands for conan to collect dependencies and build a karabo device
     - mkdir build && cd build
-    - conan install .. --remote=gitlab -pr:b=default
+    - conan install .. -pr:b=default -s build_type=Release
+    - conan build ..
+
+# test template
+.test_template: &test_it
+  stage: test
+  extends: .conan_setup_script
+  variables:
+    KARABO_BROKER_TOPIC: "gitlab_ci_$CI_JOB_ID"
+  script:
+    # commands for conan to collect dependencies and build a karabo device
+    - mkdir build && cd build
+    - conan install .. -pr:b=default -s build_type=Release -o build_tests=True
+    - conan build ..
+
+# package template
+.package_template: &package_it
+  stage: package
+  extends: .conan_setup_script
+  script:
+    # commands for conan to collect dependencies and build a karabo device
+    - mkdir build && cd build
+    - conan install .. -pr:b=default -s build_type=Release
     - conan build ..
     # push compiled karabo device package back to gitlab registry
     - conan export-pkg .. $CONAN_RECIPE
     - conan upload $CONAN_RECIPE --all --remote=gitlab --confirm
   only:
-    - branches
-  except:
-    - master
+    - tags
 
-##### confirm the projects builds #####
+##### x86_64-ubuntu 20 #####
 build:x86_64-ubuntu:
   image: conanio/gcc9:1.59.0
   <<: *build_it
+
+test:x86_64-ubuntu:
+  image: conanio/gcc9:1.59.0
+  <<: *test_it
+
+package:x86_64-ubuntu:
+  image: conanio/gcc9:1.59.0
+  <<: *package_it
+
 
 # test:ubuntu20:
 #   image: europeanxfel/karabo-ci:ubuntu-20
