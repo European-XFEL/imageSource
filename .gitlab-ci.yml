@@ -48,7 +48,7 @@ create_variables:
     - conan profile new default --detect || true > /dev/null
     - conan profile update settings.compiler.libcxx=libstdc++11 default
     # setup conan and add XFEL gitlab package registry
-    - conan remote add gitlab $CI_API_V4_URL/packages/conan
+    - conan remote add gitlab $CI_API_V4_URL/packages/conan || true
     - conan user -p $CI_JOB_TOKEN --remote=gitlab gitlab-ci-token
     # install karabo framework from conan package
     - conan install karaboFramework/$KARABO_TAG@karaboDevices+depends/any --install-folder $HOME/karabo --remote=gitlab > /dev/null
@@ -65,7 +65,9 @@ create_variables:
     - mkdir build && cd build
     - conan install .. -pr:b=default -s build_type=Release
     - conan build ..
-  # conan files downloaded for building are pushed back to cache
+    # clean up source/build directories from conan cache
+    - conan remove "*" -s -b -f
+  # conan packages from this stage are pushed back to cache
   cache:
     policy: pull-push
 
