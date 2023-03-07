@@ -36,7 +36,12 @@ create_variables:
 
 # define common actions for the build/test/package environment
 .conan_setup_script:
+  cache:
+    paths:
+      - conan_cache_dir/
+    policy: pull
   variables:
+    CONAN_USER_HOME:     $CI_PROJECT_DIR/conan_cache_dir
     KARABO_TAG:          $CONAN_RECIPE_CHANNEL
   before_script:
     # setup conan build profile
@@ -60,6 +65,9 @@ create_variables:
     - mkdir build && cd build
     - conan install .. -pr:b=default -s build_type=Release
     - conan build ..
+  # conan files downloaded for building are pushed back to cache
+  cache:
+    policy: pull-push
 
 # test template
 .test_template: &test_it
@@ -87,6 +95,7 @@ create_variables:
     - conan upload $CONAN_RECIPE --all --remote=gitlab --confirm
   only:
     - tags
+
 
 ##### x86_64-ubuntu 20 #####
 build:x86_64-ubuntu:
