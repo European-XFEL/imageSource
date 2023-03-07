@@ -4,11 +4,14 @@ from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.layout import cmake_layout
 
 
-class ImageSourceConan(ConanFile):
+class KaraboDeviceConan(ConanFile):
     generators = "CMakeToolchain", "CMakeDeps"
     settings = "os", "compiler", "build_type", "arch"
 
     name = "imageSource"
+    build_requires = ( "gtest/1.11.0",
+                       "libjpeg/9e",
+    )
     requires = ( "karaboFramework/2.16.4@karaboDevices+depends/any",
                  "opencv/4.5.5@karaboDevices+depends/any",
     )
