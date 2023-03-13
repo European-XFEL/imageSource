@@ -89,9 +89,6 @@ if (BUILD_TESTS)
 
     enable_testing()
 
-    find_package(JPEG REQUIRED)
-    find_package(GTest REQUIRED)
-
     add_executable(
        test-${CMAKE_PROJECT_NAME}
        test/testrunner.cc   # The test runner entry point
@@ -99,6 +96,9 @@ if (BUILD_TESTS)
        # Add any other source file in here.
 
     )
+
+    include("../cmake/find_dep.cmake")
+    find_dep(gtest gtest)
 
     target_compile_options(
         test-${CMAKE_PROJECT_NAME}
@@ -109,10 +109,8 @@ if (BUILD_TESTS)
         test-${CMAKE_PROJECT_NAME}
         PRIVATE
         Threads::Threads
-        ${KARABO_LIB_TARGET_NAME}
         ${CMAKE_PROJECT_NAME}
-        GTest::gtest
-        JPEG::JPEG
+        ${gtest_LIB}
     )
 
     add_test(${CMAKE_PROJECT_NAME}Tests test-${CMAKE_PROJECT_NAME})
