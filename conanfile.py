@@ -9,14 +9,18 @@ class KaraboDeviceConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     name = "imageSource"
-    build_requires = ( "gtest/1.11.0",
-                       "libjpeg/9e",
-    )
     requires = ( "karaboFramework/2.16.4@karaboDevices+depends/any",
                  "opencv/4.5.5@karaboDevices+depends/any",
     )
     options = { "build_tests": [True, False] }
     default_options = { "build_tests": False }
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        self.copy("cmake/*")
+        self.copy("src/*")
+        # git refs needed to generate version.hh, self.copy ignores .git/
+        self.run(f"cp -r .git/ {self.export_sources_folder}")
 
     def generate(self):
         toolchain = CMakeToolchain(self)
@@ -38,7 +42,7 @@ class KaraboDeviceConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.includedirs = ["include"]
+        self.cpp_info.includedirs = ["include", "include/image_source"]
         self.cpp_info.libdirs = ["plugins"]
         self.cpp_info.libs = collect_libs(self)
 
