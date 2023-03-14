@@ -14,100 +14,71 @@
 #include <thread>
 #include <utility>
 
-#include "karabo/core/DeviceClient.hh"
-#include "karabo/core/DeviceServer.hh"
-#include "karabo/net/EventLoop.hh"
 #include "karabo/util/Hash.hh"
-#include "karabo/util/PluginLoader.hh"
+
+#include "testrunner.hh"
 
 
 #define DEVICE_SERVER_ID "testDeviceSrvCpp"
-#define TEST_IMGSRC_ID   "testImageSource"
-#define TEST_CAMSRC_ID   "testCameraImageSource"
-#define LOG_PRIORITY     "FATAL"  // Can also be "DEBUG", "INFO" or "ERROR"
+#define TEST_DEVICE_ID   "testImageSource"
 
+#define LOG_PRIORITY     "FATAL"  // Can also be "DEBUG", "INFO" or "ERROR"
 #define DEV_CLI_TIMEOUT_SEC 2
 
+using namespace ::testing;
 
 /**
  * @brief Test fixture for the ImageSource device class.
  */
-class ImageSourceFixture: public testing::Test {
+class ImageSourceFixture: public KaraboDeviceFixture {
 protected:
 
     ImageSourceFixture() = default;
 
     void SetUp( ) {
-        m_eventLoopThread = std::thread(&karabo::net::EventLoop::work);
+        karabo::util::Hash devCfg("_deviceId_", TEST_DEVICE_ID);
 
-        // Load the library dynamically
-        const karabo::util::Hash& pluginConfig = karabo::util::Hash("pluginDirectory", ".");
-        karabo::util::PluginLoader::create("PluginLoader", pluginConfig)->update();
+        /**
+         * Add configuration for this 'DefaultCfg' test fixture
+         * to the devCfg has here
+         */
 
-        // Instantiate C++ Device Server.
-        karabo::util::Hash config("serverId", DEVICE_SERVER_ID,
-                                  "scanPlugins", true,
-                                  "Logger.priority", LOG_PRIORITY);
-        m_deviceSrv = karabo::core::DeviceServer::create("DeviceServer", config);
-        m_deviceSrv->finalizeInternalInitialization();
-        // Instantiate Device Client.
-        m_deviceCli = boost::make_shared<karabo::core::DeviceClient>();
+
+        // instantiate the device to be tested
+        instantiateAndGetPointer("ImageSource", TEST_DEVICE_ID, devCfg, base_device);
+        // cast the BaseDevice::Pointer to the derived mocked class Pointer
+        imgsrc_device = boost::dynamic_pointer_cast<karabo::ImageSource>(base_device);
+
+        /**
+         * Add default expectations for this test fixture here
+         */
+
     }
 
-    void TearDown( ) {
-        m_deviceCli.reset();
-        m_deviceSrv.reset();
-        karabo::net::EventLoop::stop();
-        m_eventLoopThread.join();
+    void TearDown( ) override {
+        //ASSERT_NO_THROW(
+        //    m_deviceCli->killDevice(TEST_DEVICE_ID, DEV_CLI_TIMEOUT_SEC))
+        //<< "Failed to deinstantiate device '" << TEST_DEVICE_ID << "'";
     }
 
-    void instantiateTestDevice(const karabo::util::Hash& devSpecificCfg) {
-        karabo::util::Hash imgSrcCfg("deviceId", TEST_IMGSRC_ID);
-        imgSrcCfg.merge(devSpecificCfg);
-
-        std::pair<bool, std::string> success =
-            m_deviceCli->instantiate(DEVICE_SERVER_ID, "ImageSource",
-                                     imgSrcCfg, DEV_CLI_TIMEOUT_SEC);
-
-        ASSERT_TRUE(success.first)
-            << "Error instantiating '" << TEST_IMGSRC_ID << "':\n"
-            << success.second;
-
-        karabo::util::Hash camSrcCfg("deviceId", TEST_CAMSRC_ID);
-        camSrcCfg.merge(devSpecificCfg);
-
-        success =
-            m_deviceCli->instantiate(DEVICE_SERVER_ID, "CameraImageSource",
-                                     camSrcCfg, DEV_CLI_TIMEOUT_SEC);
-
-        ASSERT_TRUE(success.first)
-            << "Error instantiating '" << TEST_CAMSRC_ID << "':\n"
-            << success.second;
-    }
-
-    void deinstantiateTestDevice() {
-        ASSERT_NO_THROW(
-            m_deviceCli->killDevice(TEST_IMGSRC_ID, DEV_CLI_TIMEOUT_SEC))
-        << "Failed to deinstantiate device '" << TEST_IMGSRC_ID << "'";
-
-        ASSERT_NO_THROW(
-            m_deviceCli->killDevice(TEST_CAMSRC_ID, DEV_CLI_TIMEOUT_SEC))
-        << "Failed to deinstantiate device '" << TEST_CAMSRC_ID << "'";
-    }
-
-    std::thread m_eventLoopThread;
-
-    karabo::core::DeviceServer::Pointer m_deviceSrv;
-    karabo::core::DeviceClient::Pointer m_deviceCli;
+    karabo::core::BaseDevice::Pointer base_device;
+    karabo::ImageSource::Pointer imgsrc_device;
 };
 
-// TODO: Give the test case a proper name (not "testScaffold")
-TEST_F(ImageSourceFixture, testScaffold){
+// test only that device instantiates
+TEST_F(ImageSourceFixture, testDeviceInstantiation) {
 
-    // TODO: Provide a non-empty config for the device under test.
-    instantiateTestDevice(karabo::util::Hash());
+    karabo::util::Hash result = m_deviceCli->get(TEST_DEVICE_ID);
+    std::string cls = result.get<std::string>("classId");
+    std::string clsVer = result.get<std::string>("classVersion");
 
-    deinstantiateTestDevice();
+    std::cout << std::endl;
+    std::cout << "Device under test is class " << cls;
+    std::cout << ", version " << clsVer;
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    ASSERT_STREQ(cls.c_str(), "ImageSource");
 }
 
 // arguments to TEST are just strings to name your tests
