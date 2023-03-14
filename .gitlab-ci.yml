@@ -43,6 +43,10 @@ create_variables:
   variables:
     CONAN_USER_HOME:     $CI_PROJECT_DIR/conan_cache_dir
     KARABO_TAG:          $CONAN_RECIPE_CHANNEL
+    # karabo framework crashes if $KARABO not defined, since this CI
+    # uses the karaboFramework conan package, there's no need to install
+    # the framework but there is a need to define this variable
+    KARABO:              /tmp
   before_script:
     - lsb_release -a
     # setup conan build profile
