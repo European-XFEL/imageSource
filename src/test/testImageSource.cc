@@ -224,8 +224,8 @@ TEST(EncodeTests, EncodeJPEG) {
     using namespace karabo::util;
     using namespace karabo::xms;
 
-    const std::string inImage1("../../src/test/gray21.512.raw"); // grayscale data
-    const std::string outImage1("../../src/test/gray_test.jpg");
+    const std::string inImage1("gray21.512.raw"); // grayscale data
+    const std::string outImage1("gray_test.jpg");
 
     std::ifstream ifs1(inImage1, std::fstream::binary);
     if (ifs1) {
@@ -270,8 +270,8 @@ TEST(EncodeTests, EncodeJPEG) {
         throw KARABO_IO_EXCEPTION("Could not open test image " + inImage1);
     }
 
-    const std::string inImage2("../../src/test//4.2.03.raw"); // RGB data
-    const std::string outImage2("../../src/test/rgb_test.jpg");
+    const std::string inImage2("4.2.03.raw"); // RGB data
+    const std::string outImage2("rgb_test.jpg");
 
     std::ifstream ifs2(inImage2, std::fstream::binary);
     if (ifs2) {
@@ -317,8 +317,8 @@ TEST(EncodeTests, EncodeJPEG) {
         throw KARABO_IO_EXCEPTION("Could not open test image " + inImage2);
     }
 
-    const std::string inImage3("../../src/test/rgb16_test.raw"); // RGB16 data
-    const std::string outImage3("../../src/test/rgb16_test.jpg");
+    const std::string inImage3("rgb16_test.raw"); // RGB16 data
+    const std::string outImage3("rgb16_test.jpg");
 
     std::ifstream ifs3(inImage3, std::fstream::binary);
     if (ifs3) {
@@ -371,8 +371,8 @@ TEST(EncodeTests, DecodeJPEG) {
     using namespace karabo::util;
     using namespace karabo::xms;
 
-    const std::string inImage1("../../src/test/gray_test.jpg"); // created by previous test
-    const std::string outImage1("../../src/test/gray_test.raw");
+    const std::string inImage1("gray_test.jpg"); // created by previous test
+    const std::string outImage1("gray_test.raw");
 
     std::ifstream ifs1(inImage1, std::fstream::binary);
     if (ifs1) {
@@ -417,8 +417,8 @@ TEST(EncodeTests, DecodeJPEG) {
         throw KARABO_IO_EXCEPTION("Could not open test image " + inImage1);
     }
 
-    const std::string inImage2("../../src/test/rgb_test.jpg"); // created by previous test
-    const std::string outImage2("../../src/test/rgb_test.raw");
+    const std::string inImage2("rgb_test.jpg"); // created by previous test
+    const std::string outImage2("rgb_test.raw");
 
     std::ifstream ifs2(inImage2, std::fstream::binary);
     if (ifs1) {
