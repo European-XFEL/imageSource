@@ -13,7 +13,10 @@ class KaraboDeviceConan(ConanFile):
                  "opencv/4.5.5@karaboDevices+depends/any",
     )
     options = { "build_tests": [True, False] }
-    default_options = { "build_tests": False }
+    default_options = { "build_tests": False,
+                        "opencv/*:shared": True,
+                        "opencv/*:with_ffmpeg": False,
+                        "opencv/*:with_gtk": False, }
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
