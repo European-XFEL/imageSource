@@ -59,6 +59,9 @@ create_variables:
     # - conan install karaboFramework/$KARABO_TAG@karaboDevices+depends/any --install-folder $HOME/karabo --remote=gitlab > /dev/null
     # - source $HOME/karabo/activate
     # - pushd $CI_PROJECT_DIR
+  after_script:
+    # clean up build directories from conan cache
+    - conan remove "*" -b -f
 
 
 # build template
@@ -69,8 +72,6 @@ create_variables:
     # commands for conan to collect dependencies and build a karabo device
     - conan remove $CONAN_RECIPE_NAME -f || true
     - conan create . $CONAN_RECIPE -pr:b=default -s build_type=Release --build=missing --test-folder=None
-    # clean up build directories from conan cache
-    - conan remove "*" -b -f
 
 # test template
 .test_template: &test_it
@@ -79,7 +80,7 @@ create_variables:
   variables:
     KARABO_BROKER_TOPIC: "gitlab_ci_$CI_JOB_ID"
   script:
-    # provide libnssutil3.so
+    # provide libnssutil3.so, it is missing from the conanio base images
     - sudo apt-get update
     - sudo apt-get -qq install -y --no-install-recommends --no-install-suggests libnss3-tools
     # build and run the test executables in the src/test directory
