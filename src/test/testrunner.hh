@@ -17,6 +17,7 @@
 #include "karabo/core/DeviceServer.hh"
 #include "karabo/net/EventLoop.hh"
 #include "karabo/util/Hash.hh"
+#include "karabo/util/PluginLoader.hh"
 
 #define DEVICE_SERVER_ID "testDeviceSrvCpp"
 #define LOG_PRIORITY     "FATAL"  // Can also be "DEBUG", "INFO" or "ERROR"
@@ -37,12 +38,18 @@ protected:
     KaraboDeviceFixture();
     ~KaraboDeviceFixture();
 
-    // instanitate an instance of the classID (with the devCfg configuration hash)
+    // instantiate an instance of the classID (with the devCfg configuration hash)
     // and return the BaseDevice::Pointer for that instance
-    void instantiateAndGetPointer(const std::string& classId, const std::string& instanceId, 
-                                  const karabo::util::Hash& devCfg,
-                                  karabo::core::BaseDevice::Pointer& base_device);
-
+    karabo::core::BaseDevice::Pointer instantiateAndGetPointer(
+        const std::string& classId,
+        const std::string& instanceId,
+        const karabo::util::Hash& devCfg);
+    // create a device server and ask it to instantiate the classID (with the devCfg
+    // configuration hash)
+    void instantiateWithDeviceServer(
+        const std::string& classId,
+        const std::string& instanceId,
+        const karabo::util::Hash& devCfg);
 
     std::thread m_eventLoopThread;
     karabo::core::DeviceServer::Pointer m_deviceSrv;

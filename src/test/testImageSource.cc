@@ -9,45 +9,67 @@
 #include "CameraImageSource.hh"
 #include "ImageSource.hh"
 
-#include <boost/shared_ptr.hpp>
-#include <gtest/gtest.h>
 #include <thread>
 #include <utility>
+#include <boost/shared_ptr.hpp>
+#include <gtest/gtest.h>
 
 #include "karabo/util/Hash.hh"
 
 #include "testrunner.hh"
 
-
-#define DEVICE_SERVER_ID "testDeviceSrvCpp"
 #define TEST_DEVICE_ID   "testImageSource"
-
-#define LOG_PRIORITY     "FATAL"  // Can also be "DEBUG", "INFO" or "ERROR"
-#define DEV_CLI_TIMEOUT_SEC 2
 
 using namespace ::testing;
 
 /**
  * @brief Test fixture for the ImageSource device class.
+ *        Any mandatory configuration for the device needs to be
+ *        added here. Additionally, one can derive other test fixtures
+ *        from this default one to create fixtures with different
+ *        instantiation configurations or different mocking behaviour.
  */
-class ImageSourceFixture: public KaraboDeviceFixture {
+class ImageSourceDefaultCfg: public KaraboDeviceFixture {
 protected:
 
-    ImageSourceFixture() = default;
+    ImageSourceDefaultCfg() = default;
 
-    void SetUp( ) {
-        karabo::util::Hash devCfg("_deviceId_", TEST_DEVICE_ID);
-
+    void SetUp( ) override {
         /**
          * Add configuration for this 'DefaultCfg' test fixture
-         * to the devCfg has here
+         * to the devCfg hash here
          */
 
+        karabo::util::Hash devCfg("deviceId", TEST_DEVICE_ID,
+                                  "_deviceId_", TEST_DEVICE_ID);
 
+        /**
+         * Instantiate device without device server so the device pointer
+         * is returned and accessible for use with googlemock
+         *
+         * Because some features are not fully supported in this case, the device under
+         * test will behave differently compared to one instantiated within a device server
+         *
+         * Known limitations of the unit test device
+         *
+         *   - It does not receive time ticks since the device server calls slotTimeTick directly
+         *     (which is not exposed as a slot...)
+         *   - onTimeTick(tracinId, seco, frac, period) will never get called
+         *   - onTimeUpdate will never get called
+         */
         // instantiate the device to be tested
-        instantiateAndGetPointer("ImageSource", TEST_DEVICE_ID, devCfg, base_device);
-        // cast the BaseDevice::Pointer to the derived mocked class Pointer
-        imgsrc_device = boost::dynamic_pointer_cast<karabo::ImageSource>(base_device);
+        //karabo::core::BaseDevice::Pointer baseDevice;
+        //baseDevice = instantiateAndGetPointer("ImageSource", TEST_DEVICE_ID, devCfg);
+        // cast the BaseDevice::Pointer to the derived class Pointer
+        //deviceUnderTest = boost::dynamic_pointer_cast<karabo::ImageSource>(baseDevice);
+
+        /**
+         * Instantiate device inside a device server
+         *
+         * Recommended method if not using googletest/googlemock expectations
+         */
+        // instantiate the device to be tested
+        instantiateWithDeviceServer("ImageSource", TEST_DEVICE_ID, devCfg);
 
         /**
          * Add default expectations for this test fixture here
@@ -56,17 +78,20 @@ protected:
     }
 
     void TearDown( ) override {
-        //ASSERT_NO_THROW(
-        //    m_deviceCli->killDevice(TEST_DEVICE_ID, DEV_CLI_TIMEOUT_SEC))
-        //<< "Failed to deinstantiate device '" << TEST_DEVICE_ID << "'";
+        /**
+         * Shutdown the device
+         */
+        // test the preDestruction() hook
+        m_deviceCli->execute(TEST_DEVICE_ID, "slotKillDevice");
+        // test device class destruction
+        deviceUnderTest.reset();
     }
 
-    karabo::core::BaseDevice::Pointer base_device;
-    karabo::ImageSource::Pointer imgsrc_device;
+    karabo::ImageSource::Pointer deviceUnderTest;
 };
 
 // test only that device instantiates
-TEST_F(ImageSourceFixture, testDeviceInstantiation) {
+TEST_F(ImageSourceDefaultCfg, testDeviceInstantiation) {
 
     karabo::util::Hash result = m_deviceCli->get(TEST_DEVICE_ID);
     std::string cls = result.get<std::string>("classId");
