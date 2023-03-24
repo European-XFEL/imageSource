@@ -24,8 +24,8 @@ void KaraboDeviceFixture::instantiateWithDeviceServer(
         const karabo::util::Hash& devCfg) {
 
     // Instantiate C++ device server
-    const karabo::util::Hash& pluginConfig = karabo::util::Hash("pluginDirectory", ".");
-    karabo::util::PluginLoader::create("PluginLoader", pluginConfig)->update();
+    //const karabo::util::Hash& pluginConfig = karabo::util::Hash("pluginDirectory", ".");
+    //karabo::util::PluginLoader::create("PluginLoader", pluginConfig)->update();
 
     // scanPlugins is set to true to scan $KARABO/plugins directory
     // can be set to false if other libraries are not needed for testing

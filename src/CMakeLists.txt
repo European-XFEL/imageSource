@@ -111,8 +111,12 @@ if (BUILD_TESTS)
         Threads::Threads
         ${CMAKE_PROJECT_NAME}
         ${gtest_LIB}
+        jpeg
     )
 
     add_test(${CMAKE_PROJECT_NAME}Tests test-${CMAKE_PROJECT_NAME})
+
+    file(GLOB IMG_FILES "${CMAKE_CURRENT_SOURCE_DIR}/test/*.raw")
+    file(COPY ${IMG_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 endif()
