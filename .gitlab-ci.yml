@@ -21,7 +21,7 @@ create_variables:
         # karabo version is second part after the '-'
         CONAN_RECIPE_CHANNEL="${CI_COMMIT_TAG#*-}"
       # if this is a tagged pipeline with one part ...
-      elif [[ -z $CI_COMMIT_TAG ]]; then
+      elif [[ ! -z "$CI_COMMIT_TAG" ]]; then
         # recipe version equals the tag
         CONAN_RECIPE_VERSION="$CI_COMMIT_TAG"
       fi
