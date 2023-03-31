@@ -20,7 +20,10 @@ create_variables:
         CONAN_RECIPE_VERSION="${CI_COMMIT_TAG%-*}"
         # karabo version is second part after the '-'
         CONAN_RECIPE_CHANNEL="${CI_COMMIT_TAG#*-}"
-        KARABO_TAG=$CONAN_RECIPE_CHANNEL
+      # if this is a tagged pipeline with one part ...
+      elif [[ -z $CI_COMMIT_TAG ]]; then
+        # recipe version equals the tag
+        CONAN_RECIPE_VERSION="$CI_COMMIT_TAG"
       fi
       # pass environment variables on to next step via artifacts:reports:dotenv
       echo "CONAN_RECIPE_NAME=$CONAN_RECIPE_NAME" >> dotenv.txt
