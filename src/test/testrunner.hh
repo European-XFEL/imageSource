@@ -3,7 +3,7 @@
  *
  * Created on August 22, 2022, 10:36 AM
  *
- * Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
+ * Copyright (c) European XFEL GmbH Schenefeld. All rights reserved.
  */
 
 #ifndef TESTRUNNER_HH

@@ -3,7 +3,7 @@
  *
  * Created on February 11, 2020, 09:18 AM
  *
- * Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
+ * Copyright (c) European XFEL GmbH Schenefeld. All rights reserved.
  */
 
 #ifndef KARABO_CAMERAIMAGESOURCE_HH

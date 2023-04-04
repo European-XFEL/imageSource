@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) European XFEL GmbH Schenefeld. All rights reserved.
+ */
+
 #include "CameraImageSource.hh"
 
 using namespace std;
