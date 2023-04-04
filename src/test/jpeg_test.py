@@ -1,3 +1,5 @@
+# Copyright (c) European XFEL GmbH Schenefeld. All rights reserved.
+
 import unittest
 
 import numpy as np

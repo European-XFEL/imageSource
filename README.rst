@@ -1,6 +1,39 @@
-******************************
-ImageSource Device (C++)
-******************************
+*************************
+ImageSource Package (C++)
+*************************
+
+Overview
+========
+
+This package provides base classes for Karabo device classes that provide
+images and are written in the `C++` API.
+
+Contact
+=======
+
+For questions, please contact opensource@xfel.eu.
+
+License and Contributing
+========================
+
+This software is released by the European XFEL GmbH as is and without any
+warranty under the GPLv3 license.
+If you have questions on contributing to the project, please get in touch at
+opensource@xfel.eu.
+Before contributing you are required to sign either a Contributors License
+Agreement, or Entity Contributor License Agreement, which you can find in the
+root directory of this project.
+Please mail the signed agreement to opensource@xfel.eu.
+By signing the CLA you acknowledge that copyright and all intellectual property
+rights of your contribution are transferred to the European X-ray Free Electron
+Laser Facility GmbH.
+You are free to use this software under the terms of the GPLv3 without signing
+a CLA.
+
+Dependencies
+============
+
+This package depends on opencv (https://opencv.org/)
 
 Compiling
 =========

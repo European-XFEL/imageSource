@@ -3,7 +3,7 @@
  *
  * Created on August 24, 2022, 09:41 AM
  *
- * Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
+ * Copyright (c) European XFEL GmbH Schenefeld. All rights reserved.
  */
 
 #include "CameraImageSource.hh"
