@@ -38,8 +38,8 @@ We ask for your understanding that we cannot accept external
 contributions without a CLA in place. Importantly, with signing the CLA
 you acknowledge that
 
-* European XFEL retains all copyrights of the Karabo Image Processor,
-* European XFEL may relicense the Karabo Image Processor under other 
+* European XFEL retains all copyrights of the Karabo Image Source package,
+* European XFEL may relicense the Karabo Image Source package under other 
   appropriate open source licenses which the Free Software Foundation 
   classifies as Free Software licenses. 
 
