@@ -6,7 +6,7 @@ if [ -z $KARABO ]; then
 fi
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # "karabo install" expects the installation directory here
-TARGET_DIR=$KARABO/extern
+TARGET_DIR=$SCRIPTPATH/localdist
 BUILD_DIR=$SCRIPTPATH/build
 
 mkdir -p $TARGET_DIR/lib
@@ -38,3 +38,5 @@ cmake $BUILD_OPT
 $(cp $BUILD_DIR/imageSource/lib*.so $TARGET_DIR/lib/. | true)
 $(cp $SCRIPTPATH/src/*.hh  $TARGET_DIR/include/image_source/. | true)
 $(patchelf --force-rpath --set-rpath '$ORIGIN/../../lib:$ORIGIN/../lib64:$ORIGIN' $TARGET_DIR/lib/libimageSource.so)
+
+$KARABO/bin/.bundle-dependency.sh
