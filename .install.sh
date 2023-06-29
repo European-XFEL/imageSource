@@ -37,3 +37,4 @@ cd $BUILD_DIR
 cmake $BUILD_OPT
 $(cp $BUILD_DIR/imageSource/lib*.so $TARGET_DIR/lib/. | true)
 $(cp $SCRIPTPATH/src/*.hh  $TARGET_DIR/include/image_source/. | true)
+$(patchelf --force-rpath --set-rpath '$ORIGIN/../../lib:$ORIGIN/../lib64:$ORIGIN' $TARGET_DIR/lib/libimageSource.so)
