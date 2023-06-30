@@ -1,42 +1,12 @@
 #!/bin/bash
 
 if [ -z $KARABO ]; then
-  echo "\$KARABO is not defined. Make sure you have sourced the activate script for the Karabo Framework you would like to use."
-  exit 1
+    if [ -e $HOME/.karabo/karaboFramework ]; then
+        KARABO=$(cat $HOME/.karabo/karaboFramework)
+    else
+      echo "ERROR Could not find karaboFramework. Make sure you have installed the karaboFramework."
+      exit 1
+    fi
 fi
-SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-# "karabo install" expects the installation directory here
-TARGET_DIR=$SCRIPTPATH/localdist
-BUILD_DIR=$SCRIPTPATH/build
-
-mkdir -p $TARGET_DIR/lib
-mkdir -p $TARGET_DIR/include/image_source
-mkdir -p $BUILD_DIR
-
-# handle the make -j option from the caller.
-BUILD_OPT="--build ."
-unset MAKEFLAGS
-if [[ "${2}" != "" ]]; then
-  BUILD_OPT="--build . -j ${2}"
-# or use all but 4 procs on system
-# (minimum nproc is always 1)
-elif command -v nproc &> /dev/null; then
-  NPROC=$(nproc --all --ignore=4)
-  BUILD_OPT="--build . -j${NPROC}"
-fi
-
-cmake \
-    -DCMAKE_BUILD_TYPE=$1 \
-    -DBUILD_TESTS=0 \
-    -DBoost_NO_BOOST_CMAKE=ON \
-    -DBoost_NO_SYSTEM_PATHS=ON \
-    -DCMAKE_PREFIX_PATH=$KARABO/extern \
-    -DCMAKE_INSTALL_PREFIX=$TARGET_DIR \
-    -B $BUILD_DIR .
-cd $BUILD_DIR
-cmake $BUILD_OPT
-$(cp $BUILD_DIR/imageSource/lib*.so $TARGET_DIR/lib/. | true)
-$(cp $SCRIPTPATH/src/*.hh  $TARGET_DIR/include/image_source/. | true)
-$(patchelf --force-rpath --set-rpath '$ORIGIN/../../lib:$ORIGIN/../lib64:$ORIGIN' $TARGET_DIR/lib/libimageSource.so)
 
 $KARABO/bin/.bundle-dependency.sh

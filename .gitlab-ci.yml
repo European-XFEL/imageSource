@@ -1,12 +1,10 @@
-stages:
-  - lint
-  - build
-  - deploy
-
 include:
   - project: karabo/gitlabci
     file: .cpp-ci.yml
     ref: main
+  - project: karabo/gitlabci
+    file: .cpp-package.yml
+    ref: feat/package_tags
   - project: karabo/gitlabci
     file: .mirror-device.yml
     ref: main
