@@ -25,7 +25,7 @@ KaraboDeviceFixture::KaraboDeviceFixture() {
     m_deviceCli = boost::make_shared<DeviceClient>();
 }
 
-void KaraboDeviceFixture::instantiateAndGetPointer(const std::string& classId, const std::string& instanceId, 
+void KaraboDeviceFixture::instantiateAndGetPointer(const std::string& classId, const std::string& instanceId,
         const karabo::util::Hash& devCfg, karabo::core::BaseDevice::Pointer& base_device) {
 
     std::string errorMsg, errorDetails;

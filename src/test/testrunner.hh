@@ -27,7 +27,7 @@
 /**
  * @brief Test fixture for setup/teardown of karabo event loop,
  *        device server, and device client.
- * 
+ *
  *        This class is generic and does not need to be modified
  *        to support different device classes.
  */
@@ -39,7 +39,7 @@ protected:
 
     // instanitate an instance of the classID (with the devCfg configuration hash)
     // and return the BaseDevice::Pointer for that instance
-    void instantiateAndGetPointer(const std::string& classId, const std::string& instanceId, 
+    void instantiateAndGetPointer(const std::string& classId, const std::string& instanceId,
                                   const karabo::util::Hash& devCfg,
                                   karabo::core::BaseDevice::Pointer& base_device);
 

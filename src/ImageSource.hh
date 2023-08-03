@@ -172,7 +172,7 @@ namespace karabo {
          * @param buffer An optional buffer, to be used for image rotation. Its size must be at
          * least (width * height * bytesPerPixel). If a null pointer is passed, than the buffer
          * is allocated internally in the function.
-         * 
+         *
          */
         void rotateImage(karabo::xms::ImageData& imd, unsigned int angle, void* buffer=nullptr);
 
@@ -185,7 +185,7 @@ namespace karabo {
          * @param buffer An optional buffer, to be used for image rotation. Its size must be at
          * least (width * height * bytesPerPixel). If a null pointer is passed, than the buffer
          * is allocated internally in the function.
-         * 
+         *
          */
         template <class T>
         void rotate_image(karabo::util::NDArray& arr, unsigned int angle, void* buffer=nullptr);
@@ -199,7 +199,7 @@ namespace karabo {
          * @param buffer An optional buffer, to be used for image flip. Its size must be at least
          * (width * height * bytesPerPixel). If a null pointer is passed, than the buffer is
          * allocated internally in the function.
-         * 
+         *
          */
         void flipImage(karabo::xms::ImageData& imd, bool flipX, bool flipY, void* buffer=nullptr);
 
@@ -213,7 +213,7 @@ namespace karabo {
          * @param buffer An optional buffer, to be used for image flip. Its size must be at least
          * (width * height * bytesPerPixel). If a null pointer is passed, than the buffer is
          * allocated internally in the function.
-         * 
+         *
          */
         template <class T>
         void flip_image(karabo::util::NDArray& arr, bool flipX, bool flipY, void* buffer=nullptr);
@@ -222,4 +222,3 @@ namespace karabo {
 } // namespace karabo
 
 #endif
-
