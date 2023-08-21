@@ -47,4 +47,3 @@ namespace karabo {
 } // namespace karabo
 
 #endif
-
