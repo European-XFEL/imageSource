@@ -24,51 +24,37 @@ namespace karabo {
 
     KARABO_REGISTER_FOR_CONFIGURATION(BaseDevice, Device<>, ImageSource)
 
-
     void ImageSource::expectedParameters(Schema& expected) {
         Schema data;
 
-        NODE_ELEMENT(data).key("data")
-            .displayedName("Data")
-            .setDaqDataType(DaqDataType::TRAIN)
-            .commit();
+        NODE_ELEMENT(data).key("data").displayedName("Data").setDaqDataType(DaqDataType::TRAIN).commit();
 
-        IMAGEDATA(data).key("data.image")
-            .displayedName("Image")
-            // Set initial dummy values for DAQ
-            .setDimensions("0, 0") // from 2.16.0 onwards better do: .setDimensions({0, 0})
+        IMAGEDATA(data)
+              .key("data.image")
+              .displayedName("Image")
+              // Set initial dummy values for DAQ
+              .setDimensions("0, 0") // from 2.16.0 onwards better do: .setDimensions({0, 0})
 
-            .setType(Types::UINT16)
-            .setEncoding(Encoding::UNDEFINED)
-            .commit();
+              .setType(Types::UINT16)
+              .setEncoding(Encoding::UNDEFINED)
+              .commit();
 
-        OUTPUT_CHANNEL(expected).key("output")
-            .displayedName("Output")
-            .dataSchema(data)
-            .commit();
+        OUTPUT_CHANNEL(expected).key("output").displayedName("Output").dataSchema(data).commit();
 
         // Second output channel for the DAQ
-        OUTPUT_CHANNEL(expected).key("daqOutput")
-            .displayedName("DAQ Output")
-            .dataSchema(data)
-            .commit();
+        OUTPUT_CHANNEL(expected).key("daqOutput").displayedName("DAQ Output").dataSchema(data).commit();
     }
 
+    ImageSource::ImageSource(const karabo::util::Hash& config)
+        : Device<>(config),
+          m_shape(config.get<std::vector<unsigned long long>>("output.schema.data.image.dims")),
+          m_encoding(config.get<int>("output.schema.data.image.encoding")),
+          m_kType(config.get<int>("output.schema.data.image.pixels.type")) {}
 
-    ImageSource::ImageSource(const karabo::util::Hash& config) : Device<>(config),
-            m_shape(config.get<std::vector<unsigned long long>>("output.schema.data.image.dims")),
-            m_encoding(config.get<int>("output.schema.data.image.encoding")),
-            m_kType(config.get<int>("output.schema.data.image.pixels.type")) {
-    }
-
-
-    ImageSource::~ImageSource() {
-    }
-
+    ImageSource::~ImageSource() {}
 
     void ImageSource::updateOutputSchema(const std::vector<unsigned long long>& shape, const EncodingType& encoding,
                                          const Types::ReferenceType& kType) {
-
         boost::mutex::scoped_lock lock(m_updateSchemaMtx);
 
         if (shape == m_shape && encoding == m_encoding && kType == m_kType) {
@@ -81,8 +67,9 @@ namespace karabo {
         this->schema_update_helper(schemaUpdate, "output", "Output", shape, encoding, kType);
 
         std::vector<unsigned long long> daqShape = shape;
-        std::reverse(daqShape.begin(), daqShape.end()); // NB DAQ wants fastest changing index first, e.g. (width,
-                                                        // height) or (channel, width, height)
+        std::reverse(daqShape.begin(),
+                     daqShape.end()); // NB DAQ wants fastest changing index first, e.g.
+                                      // (width, height) or (channel, width, height)
         this->schema_update_helper(schemaUpdate, "daqOutput", "DAQ Output", daqShape, encoding, kType);
 
         this->appendSchema(schemaUpdate);
@@ -92,46 +79,35 @@ namespace karabo {
         m_kType = kType;
     }
 
-
     void ImageSource::schema_update_helper(Schema& schemaUpdate, const std::string& nodeKey,
                                            const std::string& displayedName,
                                            const std::vector<unsigned long long>& shape, const EncodingType& encoding,
                                            const Types::ReferenceType& kType) {
         Schema dataSchema;
-        NODE_ELEMENT(dataSchema).key("data")
-            .displayedName("Data")
-            .setDaqDataType(DaqDataType::TRAIN)
-            .commit();
+        NODE_ELEMENT(dataSchema).key("data").displayedName("Data").setDaqDataType(DaqDataType::TRAIN).commit();
 
-        IMAGEDATA(dataSchema).key("data.image")
-            .displayedName("Image")
-            .setDimensions(karabo::util::toString(shape))
-            .setType(kType)
-            .setEncoding(encoding)
-            .commit();
+        IMAGEDATA(dataSchema)
+              .key("data.image")
+              .displayedName("Image")
+              .setDimensions(karabo::util::toString(shape))
+              .setType(kType)
+              .setEncoding(encoding)
+              .commit();
 
-        OUTPUT_CHANNEL(schemaUpdate).key(nodeKey)
-            .displayedName(displayedName)
-            .dataSchema(dataSchema)
-            .commit();
+        OUTPUT_CHANNEL(schemaUpdate).key(nodeKey).displayedName(displayedName).dataSchema(dataSchema).commit();
     }
 
-
     void ImageSource::writeChannels(const NDArray& data, const Dims& binning, const unsigned short bpp,
-                                    const EncodingType& encoding, const Dims& roiOffsets, const Timestamp& timestamp,
-                                    const Hash& header) {
-
+                                    const EncodingType& encoding, const Dims& roiOffsets, const Timestamp& timestamp) {
         karabo::xms::ImageData imageData(data, encoding);
         imageData.setBitsPerPixel(bpp);
         imageData.setROIOffsets(roiOffsets);
         imageData.setBinning(binning);
-        if (!header.empty()) {
-            imageData.setHeader(header);
-        }
 
         this->writeChannel("output", Hash("data.image", imageData), timestamp);
 
-        // NB DAQ wants fastest changing index first, e.g. (width, height) or (channel, width, height)
+        // NB DAQ wants fastest changing index first, e.g. (width, height) or
+        // (channel, width, height)
         Dims daqShape = data.getShape();
         daqShape.reverse();
 
@@ -139,12 +115,10 @@ namespace karabo {
         this->writeChannel("daqOutput", Hash("data.image", imageData), timestamp);
     }
 
-
     void ImageSource::signalEOS() {
         this->signalEndOfStream("output");
         this->signalEndOfStream("daqOutput");
     }
-
 
     void util::unpackMono12Packed(const uint8_t* data, const uint32_t width, const uint32_t height,
                                   uint16_t* unpackedData) {
@@ -156,7 +130,6 @@ namespace karabo {
             px += 2;
         }
     }
-
 
     void util::unpackMonoXXp(const uint8_t* data, const uint32_t width, const uint32_t height, const uint8_t bpp,
                              uint16_t* unpackedData) {
@@ -176,16 +149,13 @@ namespace karabo {
         }
     }
 
-
     void util::unpackMono10p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData) {
         util::unpackMonoXXp(data, width, height, 10, unpackedData);
     }
 
-
     void util::unpackMono12p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData) {
         util::unpackMonoXXp(data, width, height, 12, unpackedData);
     }
-
 
     void util::decodeJPEG(karabo::xms::ImageData& imd) {
         // The array which we assign the decoded JPEG stream to
@@ -201,9 +171,9 @@ namespace karabo {
         cinfo.err = jpeg_std_error(&jerr);
         jpeg_create_decompress(&cinfo);
 
-        // We can directly source the data, but need to const_cast here as cdata is returned as const.
-        // This is not a problem though, as we create and assign a new NDarray to the image data
-        // object in the process of conversion.
+        // We can directly source the data, but need to const_cast here as cdata is
+        // returned as const. This is not a problem though, as we create and assign a
+        // new NDarray to the image data object in the process of conversion.
         jpeg_mem_src(&cinfo, cdata, jpg_size);
 
         // Test if this is a valid JPEG before we fail miserably
@@ -239,7 +209,6 @@ namespace karabo {
         imd.setData(ndarr);
         imd.setEncoding(Encoding::GRAY);
     }
-
 
     void util::encodeJPEG(karabo::xms::ImageData& imd, unsigned int quality, const std::string& comment) {
         NDArray& arr = const_cast<NDArray&>(imd.getData()); // from 2.12 on, can remove the `const_cast`
@@ -283,8 +252,8 @@ namespace karabo {
                 cinfo.in_color_space = JCS_RGB;
                 break;
             default:
-                throw KARABO_PARAMETER_EXCEPTION("Conversion from " + toString(encoding)
-                                                 + " to JPEG is not implemented.");
+                throw KARABO_PARAMETER_EXCEPTION("Conversion from " + toString(encoding) +
+                                                 " to JPEG is not implemented.");
         }
 
         const Dims& dims = imd.getDimensions();
@@ -329,9 +298,7 @@ namespace karabo {
         imd.setDimensions(dims);
     }
 
-
     void util::rotateImage(karabo::xms::ImageData& imd, unsigned int angle, void* buffer) {
-
         if (!imd.isIndexable()) {
             throw KARABO_PARAMETER_EXCEPTION("Cannot rotate non-indexable image");
         }
@@ -380,7 +347,7 @@ namespace karabo {
         int rotation = imd.getRotation();
         if (rotation != Rotation::UNDEFINED) {
             rotation = (rotation + angle) % 360;
-            switch(rotation) {
+            switch (rotation) {
                 case 0:
                     imd.setRotation(Rotation::ROT_0);
                     break;
@@ -399,11 +366,10 @@ namespace karabo {
         }
     }
 
-
     template <class T>
     void util::rotate_image(karabo::util::NDArray& arr, unsigned int angle, void* buffer) {
         int type;
-        switch(sizeof(T)) {
+        switch (sizeof(T)) {
             case 1:
                 type = CV_8UC1;
                 break;
@@ -414,8 +380,8 @@ namespace karabo {
                 type = CV_32SC1;
                 break;
             default:
-                throw KARABO_NOT_IMPLEMENTED_EXCEPTION("CV Cannot handle data type of size "
-                                                       + std::to_string(sizeof(T)));
+                throw KARABO_NOT_IMPLEMENTED_EXCEPTION("CV Cannot handle data type of size " +
+                                                       std::to_string(sizeof(T)));
         }
 
         const Dims shape = arr.getShape();
@@ -432,7 +398,7 @@ namespace karabo {
         int rotateCode;
         size_t width_out;
         size_t height_out;
-        switch(angle) {
+        switch (angle) {
             case 0:
                 // nothing to be done
                 return;
@@ -472,13 +438,11 @@ namespace karabo {
 
         arr.setShape(Dims(height_out, width_out));
         if (buffer == nullptr) {
-            delete [] data_copy;
+            delete[] data_copy;
         }
     }
 
-
     void util::flipImage(karabo::xms::ImageData& imd, bool flipX, bool flipY, void* buffer) {
-
         if (!imd.isIndexable()) {
             throw KARABO_PARAMETER_EXCEPTION("Cannot flip non-indexable image");
         }
@@ -514,11 +478,10 @@ namespace karabo {
         }
     }
 
-
     template <class T>
     void util::flip_image(karabo::util::NDArray& arr, bool flipX, bool flipY, void* buffer) {
         int type;
-        switch(sizeof(T)) {
+        switch (sizeof(T)) {
             case 1:
                 type = CV_8UC1;
                 break;
@@ -529,8 +492,8 @@ namespace karabo {
                 type = CV_32SC1;
                 break;
             default:
-                throw KARABO_NOT_IMPLEMENTED_EXCEPTION("CV Cannot handle data type of size "
-                                                       + std::to_string(sizeof(T)));
+                throw KARABO_NOT_IMPLEMENTED_EXCEPTION("CV Cannot handle data type of size " +
+                                                       std::to_string(sizeof(T)));
         }
 
         const Dims shape = arr.getShape();
@@ -572,7 +535,7 @@ namespace karabo {
         cv::flip(in, out, flipCode);
 
         if (buffer == nullptr) {
-            delete [] data_copy;
+            delete[] data_copy;
         }
     }
 

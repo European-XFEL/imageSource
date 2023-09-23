@@ -7,6 +7,7 @@
  */
 
 #include "CameraImageSource.hh"
+
 #include "ImageSource.hh"
 
 using namespace std;
@@ -19,10 +20,12 @@ namespace karabo {
 
 
     void CameraImageSource::expectedParameters(Schema& expected) {
-        VECTOR_STRING_ELEMENT(expected).key("availableScenes")
-            .setSpecialDisplayType(KARABO_SCHEMA_DISPLAY_TYPE_SCENES)
-            .readOnly().initialValue(std::vector<std::string>({"scene"}))
-            .commit();
+        VECTOR_STRING_ELEMENT(expected)
+              .key("availableScenes")
+              .setSpecialDisplayType(KARABO_SCHEMA_DISPLAY_TYPE_SCENES)
+              .readOnly()
+              .initialValue(std::vector<std::string>({"scene"}))
+              .commit();
     }
 
 
@@ -32,8 +35,7 @@ namespace karabo {
     }
 
 
-    CameraImageSource::~CameraImageSource() {
-    }
+    CameraImageSource::~CameraImageSource() {}
 
 
     void CameraImageSource::requestScene(const karabo::util::Hash& params) {

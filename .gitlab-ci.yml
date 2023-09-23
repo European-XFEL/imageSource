@@ -1,7 +1,9 @@
 stages:
   - lint
   - build
-  - deploy
+  - test
+  - package
+  - publish
 
 include:
   - project: karabo/gitlabci

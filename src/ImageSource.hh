@@ -10,6 +10,7 @@
 #define KARABO_IMAGESOURCE_HH
 
 #include <karabo/karabo.hpp>
+
 #include "version.hh" // provides IMAGESOURCE_PACKAGE_VERSION
 
 /**
@@ -18,8 +19,7 @@
 namespace karabo {
 
     class ImageSource : public karabo::core::Device<> {
-
-    public:
+       public:
         KARABO_CLASSINFO(ImageSource, "ImageSource", IMAGESOURCE_PACKAGE_VERSION)
 
         static void expectedParameters(karabo::util::Schema& expected);
@@ -28,13 +28,14 @@ namespace karabo {
 
         virtual ~ImageSource();
 
-    protected:
+       protected:
         /**
          * @brief Update the device output schema according to the image properties.
          *
-         * @param shape The shape of the image, e.g. (height, width) for monochromatic- or (height, width, channel) for
-         * RGB-images .
-         * @param encoding The encoding of the image, e.g. Encoding::GRAY or Encoding::RGB.
+         * @param shape The shape of the image, e.g. (height, width) for
+         * monochromatic- or (height, width, channel) for RGB-images .
+         * @param encoding The encoding of the image, e.g. Encoding::GRAY or
+         * Encoding::RGB.
          * @param kType The image data type, e.g. Types::UINT16.
          */
         void updateOutputSchema(const std::vector<unsigned long long>& shape, const karabo::xms::EncodingType& encoding,
@@ -49,13 +50,18 @@ namespace karabo {
          * @param encoding The image encoding, e.g. Encoding::GRAY.
          * @param roiOffsets The offset of the Region-of-Interest, e.g. (roiY, roiX).
          * @param timestamp The image timestamp.
-         * @param header Any additional information to be written in the image header.
          */
         void writeChannels(const karabo::util::NDArray& data, const karabo::util::Dims& binning,
                            const unsigned short bpp, const karabo::xms::EncodingType& encoding,
-                           const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
-                           const karabo::util::Hash& header);
+                           const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp);
 
+        KARABO_DEPRECATED void writeChannels(const karabo::util::NDArray& data, const karabo::util::Dims& binning,
+                                             const unsigned short bpp, const karabo::xms::EncodingType& encoding,
+                                             const karabo::util::Dims& roiOffsets,
+                                             const karabo::util::Timestamp& timestamp,
+                                             const karabo::util::Hash& header) {
+            this->writeChannels(data, binning, bpp, encoding, roiOffsets, timestamp);
+        }
 
         /**
          * @brief Send an end-of-stream signal to 'output' and 'daqOutput' channels
@@ -63,7 +69,7 @@ namespace karabo {
          */
         void signalEOS();
 
-    private:
+       private:
         boost::mutex m_updateSchemaMtx; // Protect from concurrent updateOutputSchema calls
         std::vector<unsigned long long> m_shape;
         int m_encoding;
@@ -158,9 +164,11 @@ namespace karabo {
          * @brief Encode a GRAY image to JPEG.
          *
          * @param imd The ImageData object - encoded as JPEG - to be decoded as GRAY
-         * @param quality The compression quality. Levels of 90% or higher are considered "high
-         * quality", 80-90% is "medium quality", 70-80% is "low quality".
-         * @param comment An optional comment to be added to the JPEG image. Its maximum length is 65533 Bytes.
+         * @param quality The compression quality. Levels of 90% or higher are
+         * considered "high quality", 80-90% is "medium quality", 70-80% is "low
+         * quality".
+         * @param comment An optional comment to be added to the JPEG image. Its maximum
+         * length is 65533 Bytes.
          */
         void encodeJPEG(karabo::xms::ImageData& imd, unsigned int quality = 100, const std::string& comment = "");
 
@@ -169,12 +177,12 @@ namespace karabo {
          *
          * @param imd The ImageData object - to be rotated.
          * @param angle The rotation angle. Allowed values are: 0, 90, 180, 270 degrees.
-         * @param buffer An optional buffer, to be used for image rotation. Its size must be at
-         * least (width * height * bytesPerPixel). If a null pointer is passed, than the buffer
-         * is allocated internally in the function.
+         * @param buffer An optional buffer, to be used for image rotation. Its size
+         * must be at least (width * height * bytesPerPixel). If a null pointer is
+         * passed, than the buffer is allocated internally in the function.
          *
          */
-        void rotateImage(karabo::xms::ImageData& imd, unsigned int angle, void* buffer=nullptr);
+        void rotateImage(karabo::xms::ImageData& imd, unsigned int angle, void* buffer = nullptr);
 
         /**
          * @brief Rotate an image by 90, 180 or 270 degrees.
@@ -182,41 +190,45 @@ namespace karabo {
          * @param T The pixel data type, e.g. uint16_t.
          * @param arr The NDArray object - to be rotated.
          * @param angle The rotation angle. Allowed values are: 0, 90, 180, 270 degrees.
-         * @param buffer An optional buffer, to be used for image rotation. Its size must be at
-         * least (width * height * bytesPerPixel). If a null pointer is passed, than the buffer
-         * is allocated internally in the function.
+         * @param buffer An optional buffer, to be used for image rotation. Its size
+         * must be at least (width * height * bytesPerPixel). If a null pointer is
+         * passed, than the buffer is allocated internally in the function.
          *
          */
         template <class T>
-        void rotate_image(karabo::util::NDArray& arr, unsigned int angle, void* buffer=nullptr);
+        void rotate_image(karabo::util::NDArray& arr, unsigned int angle, void* buffer = nullptr);
 
         /**
          * @brief Flip an image in X and/or Y.
          *
          * @param imd The ImageData object - to be rotated.
-         * @param flipX If this is true, the image will be flipped in the horizontal direction.
-         * @param flipY If this is true, the image will be flipped in the vertical direction.
-         * @param buffer An optional buffer, to be used for image flip. Its size must be at least
-         * (width * height * bytesPerPixel). If a null pointer is passed, than the buffer is
-         * allocated internally in the function.
+         * @param flipX If this is true, the image will be flipped in the horizontal
+         * direction.
+         * @param flipY If this is true, the image will be flipped in the vertical
+         * direction.
+         * @param buffer An optional buffer, to be used for image flip. Its size must be
+         * at least (width * height * bytesPerPixel). If a null pointer is passed, than
+         * the buffer is allocated internally in the function.
          *
          */
-        void flipImage(karabo::xms::ImageData& imd, bool flipX, bool flipY, void* buffer=nullptr);
+        void flipImage(karabo::xms::ImageData& imd, bool flipX, bool flipY, void* buffer = nullptr);
 
         /**
          * @brief Flip an image in X and/or Y.
          *
          * @param T The pixel data type, e.g. uint16_t.
          * @param arr The NDArray object - to be rotated.
-         * @param flipX If this is true, the image will be flipped in the horizontal direction.
-         * @param flipY If this is true, the image will be flipped in the vertical direction.
-         * @param buffer An optional buffer, to be used for image flip. Its size must be at least
-         * (width * height * bytesPerPixel). If a null pointer is passed, than the buffer is
-         * allocated internally in the function.
+         * @param flipX If this is true, the image will be flipped in the horizontal
+         * direction.
+         * @param flipY If this is true, the image will be flipped in the vertical
+         * direction.
+         * @param buffer An optional buffer, to be used for image flip. Its size must be
+         * at least (width * height * bytesPerPixel). If a null pointer is passed, than
+         * the buffer is allocated internally in the function.
          *
          */
         template <class T>
-        void flip_image(karabo::util::NDArray& arr, bool flipX, bool flipY, void* buffer=nullptr);
+        void flip_image(karabo::util::NDArray& arr, bool flipX, bool flipY, void* buffer = nullptr);
 
     } // namespace util
 } // namespace karabo
