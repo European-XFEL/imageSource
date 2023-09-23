@@ -6,23 +6,22 @@
  * Copyright (c) European XFEL GmbH Schenefeld. All rights reserved.
  */
 
-#include "CameraImageSource.hh"
-#include "ImageSource.hh"
+#include <gtest/gtest.h>
 
 #include <boost/shared_ptr.hpp>
-#include <gtest/gtest.h>
 #include <thread>
 #include <utility>
 
+#include "CameraImageSource.hh"
+#include "ImageSource.hh"
 #include "karabo/util/Hash.hh"
-
 #include "testrunner.hh"
 
 
 #define DEVICE_SERVER_ID "testDeviceSrvCpp"
-#define TEST_DEVICE_ID   "testImageSource"
+#define TEST_DEVICE_ID "testImageSource"
 
-#define LOG_PRIORITY     "FATAL"  // Can also be "DEBUG", "INFO" or "ERROR"
+#define LOG_PRIORITY "FATAL" // Can also be "DEBUG", "INFO" or "ERROR"
 #define DEV_CLI_TIMEOUT_SEC 2
 
 using namespace ::testing;
@@ -30,12 +29,11 @@ using namespace ::testing;
 /**
  * @brief Test fixture for the ImageSource device class.
  */
-class ImageSourceFixture: public KaraboDeviceFixture {
-protected:
-
+class ImageSourceFixture : public KaraboDeviceFixture {
+   protected:
     ImageSourceFixture() = default;
 
-    void SetUp( ) {
+    void SetUp() {
         karabo::util::Hash devCfg("_deviceId_", TEST_DEVICE_ID);
 
         /**
@@ -52,12 +50,11 @@ protected:
         /**
          * Add default expectations for this test fixture here
          */
-
     }
 
-    void TearDown( ) override {
-        //ASSERT_NO_THROW(
-        //    m_deviceCli->killDevice(TEST_DEVICE_ID, DEV_CLI_TIMEOUT_SEC))
+    void TearDown() override {
+        // ASSERT_NO_THROW(
+        //     m_deviceCli->killDevice(TEST_DEVICE_ID, DEV_CLI_TIMEOUT_SEC))
         //<< "Failed to deinstantiate device '" << TEST_DEVICE_ID << "'";
     }
 
@@ -67,7 +64,6 @@ protected:
 
 // test only that device instantiates
 TEST_F(ImageSourceFixture, testDeviceInstantiation) {
-
     karabo::util::Hash result = m_deviceCli->get(TEST_DEVICE_ID);
     std::string cls = result.get<std::string>("classId");
     std::string clsVer = result.get<std::string>("classVersion");
@@ -213,9 +209,7 @@ TEST(EncodeTests, EncodeJPEG) {
 
         // Create ImageData (no copy)
         Dims dims(512, 512);
-        NDArray data((unsigned char*)buffer, length, [](char* ptr) {
-            delete[] ptr;
-        });
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) { delete[] ptr; });
         ImageData imd(data, dims, Encoding::GRAY);
 
         // Decode JPEG
@@ -259,9 +253,7 @@ TEST(EncodeTests, EncodeJPEG) {
 
         // Create ImageData (no copy)
         Dims dims(512, 512, 3);
-        NDArray data((unsigned char*)buffer, length, [](char* ptr) {
-            delete[] ptr;
-        });
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) { delete[] ptr; });
         ImageData imd(data, dims, Encoding::RGB);
 
         // Decode JPEG
@@ -306,11 +298,7 @@ TEST(EncodeTests, EncodeJPEG) {
 
         // Create ImageData (no copy)
         Dims dims(512, 512, 3);
-        NDArray data((unsigned short*)buffer, length / sizeof(unsigned short),
-                     [](char* ptr) {
-                         delete[] ptr;
-                     },
-                     dims);
+        NDArray data((unsigned short*)buffer, length / sizeof(unsigned short), [](char* ptr) { delete[] ptr; }, dims);
         ImageData imd(data, Encoding::RGB);
 
         // Decode JPEG
@@ -360,9 +348,7 @@ TEST(EncodeTests, DecodeJPEG) {
 
         // Create ImageData (no copy)
         Dims dims(512, 512);
-        NDArray data((unsigned char*)buffer, length, [](char* ptr) {
-            delete[] ptr;
-        });
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) { delete[] ptr; });
         ImageData imd(data, dims, Encoding::JPEG);
 
         // Decode JPEG
@@ -406,9 +392,7 @@ TEST(EncodeTests, DecodeJPEG) {
 
         // Create ImageData (no copy)
         Dims dims(512, 512, 3);
-        NDArray data((unsigned char*)buffer, length, [](char* ptr) {
-            delete[] ptr;
-        });
+        NDArray data((unsigned char*)buffer, length, [](char* ptr) { delete[] ptr; });
         ImageData imd(data, dims, Encoding::JPEG);
 
         // Decode JPEG
@@ -442,16 +426,9 @@ TEST(RotateTests, Rotate) {
 
     // Test 90 degrees rotation
     {
-        uint8_t data_in[] = {
-            0x01, 0x02, 0x03, 0x04,
-            0x05, 0x06, 0x07, 0x08,
-            0x09, 0x0A, 0x0B, 0x0C};
+        uint8_t data_in[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};
 
-        uint8_t expected_data[] = {
-            0x09, 0x05, 0x01,
-            0x0A, 0x06, 0x02,
-            0x0B, 0x07, 0x03,
-            0x0C, 0x08, 0x04};
+        uint8_t expected_data[] = {0x09, 0x05, 0x01, 0x0A, 0x06, 0x02, 0x0B, 0x07, 0x03, 0x0C, 0x08, 0x04};
 
         const Dims shape(3, 4);
         NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
@@ -472,15 +449,9 @@ TEST(RotateTests, Rotate) {
 
     // Test 180 degrees rotation
     {
-        uint16_t data_in[] = {
-            0x01, 0x02, 0x03, 0x04,
-            0x05, 0x06, 0x07, 0x08,
-            0x09, 0x0A, 0x0B, 0x0C};
+        uint16_t data_in[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};
 
-        uint16_t expected_data[] = {
-            0x0C, 0x0B, 0x0A, 0x09,
-            0x08, 0x07, 0x06, 0x05,
-            0x04, 0x03, 0x02, 0x01};
+        uint16_t expected_data[] = {0x0C, 0x0B, 0x0A, 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01};
 
         const Dims shape(3, 4);
         NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
@@ -502,16 +473,9 @@ TEST(RotateTests, Rotate) {
 
     // Test 270 degrees rotation
     {
-        uint32_t data_in[] = {
-            0x01, 0x02, 0x03, 0x04,
-            0x05, 0x06, 0x07, 0x08,
-            0x09, 0x0A, 0x0B, 0x0C};
+        uint32_t data_in[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};
 
-        uint32_t expected_data[] = {
-            0x04, 0x08, 0x0C,
-            0x03, 0x07, 0x0B,
-            0x02, 0x06, 0x0A,
-            0x01, 0x05, 0x09};
+        uint32_t expected_data[] = {0x04, 0x08, 0x0C, 0x03, 0x07, 0x0B, 0x02, 0x06, 0x0A, 0x01, 0x05, 0x09};
 
         const Dims shape(3, 4);
         uint32_t buffer[shape.size()];
@@ -533,9 +497,7 @@ TEST(RotateTests, Rotate) {
     }
 
     {
-        uint8_t data_in[] = {0x01, 0x02, 0x03, 0x04,
-                             0x05, 0x06, 0x07, 0x08,
-                             0x09, 0x0A, 0x0B, 0x0C};
+        uint8_t data_in[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};
         const Dims shape(3, 4);
         NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
         ImageData imd(arr_in);
@@ -550,15 +512,9 @@ TEST(FlipTests, Flip) {
 
     // Test horizontal flip
     {
-        uint8_t data_in[] = {
-            0x01, 0x02, 0x03, 0x04,
-            0x05, 0x06, 0x07, 0x08,
-            0x09, 0x0A, 0x0B, 0x0C};
+        uint8_t data_in[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};
 
-        uint8_t expected_data[] = {
-            0x04, 0x03, 0x02, 0x01,
-            0x08, 0x07, 0x06, 0x05,
-            0x0C, 0x0B, 0x0A, 0x09};
+        uint8_t expected_data[] = {0x04, 0x03, 0x02, 0x01, 0x08, 0x07, 0x06, 0x05, 0x0C, 0x0B, 0x0A, 0x09};
 
         const Dims shape(3, 4);
         NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
@@ -581,15 +537,9 @@ TEST(FlipTests, Flip) {
 
     // Test vertical flip
     {
-        uint16_t data_in[] = {
-            0x01, 0x02, 0x03, 0x04,
-            0x05, 0x06, 0x07, 0x08,
-            0x09, 0x0A, 0x0B, 0x0C};
+        uint16_t data_in[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};
 
-        uint16_t expected_data[] = {
-            0x09, 0x0A, 0x0B, 0x0C,
-            0x05, 0x06, 0x07, 0x08,
-            0x01, 0x02, 0x03, 0x04};
+        uint16_t expected_data[] = {0x09, 0x0A, 0x0B, 0x0C, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04};
 
         const Dims shape(3, 4);
         NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
@@ -612,15 +562,9 @@ TEST(FlipTests, Flip) {
 
     // Test horizonzal + vertical flip
     {
-        uint32_t data_in[] = {
-            0x01, 0x02, 0x03, 0x04,
-            0x05, 0x06, 0x07, 0x08,
-            0x09, 0x0A, 0x0B, 0x0C};
+        uint32_t data_in[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};
 
-        uint32_t expected_data[] = {
-            0x0C, 0x0B, 0x0A, 0x09,
-            0x08, 0x07, 0x06, 0x05,
-            0x04, 0x03, 0x02, 0x01};
+        uint32_t expected_data[] = {0x0C, 0x0B, 0x0A, 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01};
 
         const Dims shape(3, 4);
         NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);

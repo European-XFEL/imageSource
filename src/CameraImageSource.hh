@@ -20,8 +20,7 @@
 namespace karabo {
 
     class CameraImageSource : public ImageSource {
-
-    public:
+       public:
         KARABO_CLASSINFO(CameraImageSource, "CameraImageSource", IMAGESOURCE_PACKAGE_VERSION)
 
         static void expectedParameters(karabo::util::Schema& expected);
@@ -30,13 +29,13 @@ namespace karabo {
 
         virtual ~CameraImageSource();
 
-    private:
+       private:
         // implement scene map protocol
         using SceneFunction = boost::function<std::string()>;
         using SceneMap = std::map<std::string, SceneFunction>;
         SceneMap m_scenes;
 
-    protected:
+       protected:
         void requestScene(const karabo::util::Hash& params);
         void registerScene(const SceneFunction& sceneFunction, const std::string& funcName);
         // the main scene
