@@ -29,12 +29,12 @@ namespace karabo {
 
         NODE_ELEMENT(data).key("data").displayedName("Data").setDaqDataType(DaqDataType::TRAIN).commit();
 
+        const std::vector<unsigned long long> shape = {0, 0};
         IMAGEDATA(data)
               .key("data.image")
               .displayedName("Image")
               // Set initial dummy values for DAQ
-              .setDimensions("0, 0") // from 2.16.0 onwards better do: .setDimensions({0, 0})
-
+              .setDimensions(shape)
               .setType(Types::UINT16)
               .setEncoding(Encoding::UNDEFINED)
               .commit();
@@ -89,7 +89,7 @@ namespace karabo {
         IMAGEDATA(dataSchema)
               .key("data.image")
               .displayedName("Image")
-              .setDimensions(karabo::util::toString(shape))
+              .setDimensions(shape)
               .setType(kType)
               .setEncoding(encoding)
               .commit();
