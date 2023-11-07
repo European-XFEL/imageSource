@@ -22,6 +22,10 @@ USING_KARABO_NAMESPACES;
 
 namespace karabo {
 
+    const std::vector<unsigned long long> initial_shape = {1, 1};
+    const EncodingType initial_encoding = Encoding::GRAY;
+    const Types::ReferenceType initial_kType = Types::UINT16;
+
     KARABO_REGISTER_FOR_CONFIGURATION(BaseDevice, Device<>, ImageSource)
 
     void ImageSource::expectedParameters(Schema& expected) {
@@ -29,14 +33,13 @@ namespace karabo {
 
         NODE_ELEMENT(data).key("data").displayedName("Data").setDaqDataType(DaqDataType::TRAIN).commit();
 
-        const std::vector<unsigned long long> shape = {0, 0};
         IMAGEDATA(data)
               .key("data.image")
               .displayedName("Image")
               // Set initial dummy values for DAQ
-              .setDimensions(shape)
-              .setType(Types::UINT16)
-              .setEncoding(Encoding::UNDEFINED)
+              .setDimensions(initial_shape)
+              .setEncoding(initial_encoding)
+              .setType(initial_kType)
               .commit();
 
         OUTPUT_CHANNEL(expected).key("output").displayedName("Output").dataSchema(data).commit();
@@ -47,9 +50,9 @@ namespace karabo {
 
     ImageSource::ImageSource(const karabo::util::Hash& config)
         : Device<>(config),
-          m_shape(config.get<std::vector<unsigned long long>>("output.schema.data.image.dims")),
-          m_encoding(config.get<int>("output.schema.data.image.encoding")),
-          m_kType(config.get<int>("output.schema.data.image.pixels.type")) {}
+          m_shape(initial_shape),
+          m_encoding(initial_encoding),
+          m_kType(initial_kType) {}
 
     ImageSource::~ImageSource() {}
 
