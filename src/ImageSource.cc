@@ -450,7 +450,7 @@ namespace karabo {
             throw KARABO_PARAMETER_EXCEPTION("Cannot flip non-indexable image");
         }
 
-        NDArray& arr = const_cast<NDArray&>(imd.getData()); // from 2.12 on, can remove the `const_cast`
+        NDArray& arr = imd.getData();
         const size_t itemSize = arr.itemSize();
 
         switch (itemSize) {
@@ -483,26 +483,37 @@ namespace karabo {
 
     template <class T>
     void util::flip_image(karabo::util::NDArray& arr, bool flipX, bool flipY, void* buffer) {
+        const Dims shape = arr.getShape();
+        unsigned long long channels;
+        if (shape.rank() == 2) {
+            // Monochromatic image
+            channels = 1;
+        } else if (shape.rank() == 3) {
+            channels = shape.x3();
+            // Color images have 3 or 4 channels (e.g. RGB, YUV, RGBA)
+            // XXX What about Bayer Formats?
+            // (see https://en.wikipedia.org/wiki/Bayer_filter)
+            if (channels !=3 && channels != 4) {
+                throw KARABO_NOT_IMPLEMENTED_EXCEPTION("Can only flip monochromatic/color images");
+            }
+        } else {
+            throw KARABO_NOT_IMPLEMENTED_EXCEPTION("Can only flip monochromatic/color images");
+        }
+
         int type;
         switch (sizeof(T)) {
             case 1:
-                type = CV_8UC1;
+                type = CV_8UC(channels);
                 break;
             case 2:
-                type = CV_16UC1;
+                type = CV_16UC(channels);
                 break;
             case 4:
-                type = CV_32SC1;
+                type = CV_32SC(channels);
                 break;
             default:
                 throw KARABO_NOT_IMPLEMENTED_EXCEPTION("CV Cannot handle data type of size " +
                                                        std::to_string(sizeof(T)));
-        }
-
-        const Dims shape = arr.getShape();
-        if (shape.rank() != 2) {
-            // XXX possibly extend to colour images
-            throw KARABO_NOT_IMPLEMENTED_EXCEPTION("Can only flip monochromatic images");
         }
 
         int flipCode;
@@ -535,7 +546,17 @@ namespace karabo {
 
         cv::Mat in(height, width, type, (void*)data_copy);
         cv::Mat out(height, width, type, (void*)data);
-        cv::flip(in, out, flipCode);
+        if (shape.rank() == 2) {
+            cv::flip(in, out, flipCode);
+        } else { // shape.rank() == 3
+            cv::Mat channels_in[channels];
+            cv::Mat channels_out[channels];
+            cv::split(in, channels_in);
+            for (size_t i = 0; i < channels; ++i) {
+                cv::flip(channels_in[i], channels_out[i], flipCode);
+            }
+            cv::merge(channels_out, channels, out);
+        }
 
         if (buffer == nullptr) {
             delete[] data_copy;
