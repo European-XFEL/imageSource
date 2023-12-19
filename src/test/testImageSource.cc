@@ -584,4 +584,30 @@ TEST(FlipTests, Flip) {
             ASSERT_EQ(expected_data[i], data_out[i]);
         }
     }
+
+    // Test horizonzal + vertical flip, RGB image
+    {
+        uint32_t data_in[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12};
+
+        uint32_t expected_data[] = {0x10, 0x11, 0x12, 0x0D, 0x0E, 0x0F, 0x0A, 0x0B, 0x0C, 0x07, 0x08, 0x09, 0x04, 0x05, 0x06, 0x01, 0x02, 0x03};
+
+        const Dims shape(2, 3, 3); // height, width, channels
+        NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
+        ImageData imd(arr_in);
+
+        karabo::util::flipImage(imd, true, true);
+
+        const NDArray& arr_out = imd.getData();
+        const uint32_t* data_out = arr_out.getData<uint32_t>();
+        ASSERT_EQ(shape.x1(), arr_out.getShape().x1());
+        ASSERT_EQ(shape.x2(), arr_out.getShape().x2());
+        ASSERT_EQ(shape.x3(), arr_out.getShape().x3());
+        ASSERT_EQ(shape.rank(), arr_out.getShape().rank());
+        ASSERT_EQ(true, imd.getFlipX());
+        ASSERT_EQ(true, imd.getFlipY());
+
+        for (size_t i = 0; i < 18; ++i) {
+            ASSERT_EQ(expected_data[i], data_out[i]);
+        }
+    }
 }
