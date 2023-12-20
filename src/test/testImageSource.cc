@@ -447,6 +447,31 @@ TEST(RotateTests, Rotate) {
         }
     }
 
+    // Test 90 degress RGB image rotation
+    {
+        uint8_t data_in[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12};
+
+        uint8_t expected_data[] = {0x0A, 0x0B, 0x0C, 0x01, 0x02, 0x03, 0x0D, 0x0E, 0x0F, 0x04, 0x05, 0x06, 0x10, 0x11, 0x12, 0x07, 0x08, 0x09};
+
+        const Dims shape(2, 3, 3); // height, width, channels
+        NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
+        ImageData imd(arr_in);
+
+        karabo::util::rotateImage(imd, 90);
+
+        const NDArray& arr_out = imd.getData();
+        const uint8_t* data_out = arr_out.getData<uint8_t>();
+        ASSERT_EQ(shape.x2(), arr_out.getShape().x1());
+        ASSERT_EQ(shape.x1(), arr_out.getShape().x2());
+        ASSERT_EQ(shape.x3(), arr_out.getShape().x3());
+        ASSERT_EQ(shape.rank(), arr_out.getShape().rank());
+        ASSERT_EQ(int(Rotation::ROT_90), imd.getRotation());
+        for (size_t i = 0; i < 18; ++i) {
+            ASSERT_EQ(expected_data[i], data_out[i]);
+        }
+        std::cout << std::endl;
+    }
+
     // Test 180 degrees rotation
     {
         uint16_t data_in[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};

@@ -164,7 +164,7 @@ namespace karabo {
         // The array which we assign the decoded JPEG stream to
         NDArray ndarr(imd.getDimensions(), Types::UINT8);
 
-        NDArray& arr = const_cast<NDArray&>(imd.getData()); // from 2.12 on, can remove the `const_cast`
+        NDArray& arr = imd.getData();
         unsigned char* cdata = arr.getData<unsigned char>();
         struct jpeg_decompress_struct cinfo;
         struct jpeg_error_mgr jerr;
@@ -214,7 +214,7 @@ namespace karabo {
     }
 
     void util::encodeJPEG(karabo::xms::ImageData& imd, unsigned int quality, const std::string& comment) {
-        NDArray& arr = const_cast<NDArray&>(imd.getData()); // from 2.12 on, can remove the `const_cast`
+        NDArray& arr = imd.getData();
 
         const Types::ReferenceType kType = arr.getType();
         std::shared_ptr<unsigned char[]> sdata;
@@ -306,7 +306,7 @@ namespace karabo {
             throw KARABO_PARAMETER_EXCEPTION("Cannot rotate non-indexable image");
         }
 
-        NDArray& arr = const_cast<NDArray&>(imd.getData()); // from 2.12 on, can remove the `const_cast`
+        NDArray& arr = imd.getData();
         const size_t itemSize = arr.itemSize();
 
         switch (itemSize) {
@@ -329,16 +329,30 @@ namespace karabo {
         }
 
         if (angle == 90 || angle == 270) {
+            std::vector<unsigned long long> vec;
+
             Dims roiOffsets = imd.getROIOffsets();
-            roiOffsets.reverse();
+            vec = roiOffsets.toVector();
+            // Swap x and y
+            vec[0] = roiOffsets.x2();
+            vec[1] = roiOffsets.x1();
+            roiOffsets.fromVector(vec);
             imd.setROIOffsets(roiOffsets);
 
             Dims binning = imd.getBinning();
-            binning.reverse();
+            vec = binning.toVector();
+            // Swap x and y
+            vec[0] = binning.x2();
+            vec[1] = binning.x1();
+            binning.fromVector(vec);
             imd.setBinning(binning);
 
             Dims dimensions = imd.getDimensions();
-            dimensions.reverse();
+            vec = dimensions.toVector();
+            // Swap x and y
+            vec[0] = dimensions.x2();
+            vec[1] = dimensions.x1();
+            dimensions.fromVector(vec);
             imd.setDimensions(dimensions);
 
             const bool flipX = imd.getFlipX();
@@ -371,26 +385,37 @@ namespace karabo {
 
     template <class T>
     void util::rotate_image(karabo::util::NDArray& arr, unsigned int angle, void* buffer) {
+        const Dims shape = arr.getShape();
+        unsigned long long channels;
+        if (shape.rank() == 2) {
+            // Monochromatic image
+            channels = 1;
+        } else if (shape.rank() == 3) {
+            channels = shape.x3();
+            // Color images have 3 or 4 channels (e.g. RGB, YUV, RGBA)
+            // XXX What about Bayer Formats?
+            // (see https://en.wikipedia.org/wiki/Bayer_filter)
+            if (channels !=3 && channels != 4) {
+                throw KARABO_NOT_IMPLEMENTED_EXCEPTION("Can only flip monochromatic/color images");
+            }
+        } else {
+            throw KARABO_NOT_IMPLEMENTED_EXCEPTION("Can only rotate monochromatic/color images");
+        }
+
         int type;
         switch (sizeof(T)) {
             case 1:
-                type = CV_8UC1;
+                type = CV_8UC(channels);
                 break;
             case 2:
-                type = CV_16UC1;
+                type = CV_16UC(channels);
                 break;
             case 4:
-                type = CV_32SC1;
+                type = CV_32SC(channels);
                 break;
             default:
                 throw KARABO_NOT_IMPLEMENTED_EXCEPTION("CV Cannot handle data type of size " +
                                                        std::to_string(sizeof(T)));
-        }
-
-        const Dims shape = arr.getShape();
-        if (shape.rank() != 2) {
-            // XXX possibly extend to colour images
-            throw KARABO_NOT_IMPLEMENTED_EXCEPTION("Can only rotate monochromatic images");
         }
 
         const size_t width = shape.x2();
@@ -437,9 +462,20 @@ namespace karabo {
 
         cv::Mat in(height, width, type, (void*)data_copy);
         cv::Mat out(height_out, width_out, type, (void*)data);
-        cv::rotate(in, out, rotateCode);
+        if (shape.rank() == 2) {
+            cv::rotate(in, out, rotateCode);
+            arr.setShape(Dims(height_out, width_out));
+        } else { // shape.rank() == 3
+            cv::Mat channels_in[channels];
+            cv::Mat channels_out[channels];
+            cv::split(in, channels_in);
+            for (size_t i = 0; i < channels; ++i) {
+                cv::rotate(channels_in[i], channels_out[i], rotateCode);
+            }
+            cv::merge(channels_out, channels, out);
+            arr.setShape(Dims(height_out, width_out, shape.x3()));
+        }
 
-        arr.setShape(Dims(height_out, width_out));
         if (buffer == nullptr) {
             delete[] data_copy;
         }
