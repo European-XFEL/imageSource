@@ -2,6 +2,7 @@ stages:
   - lint
   - build
   - test
+  - depends
   - package
   - publish
 
@@ -11,4 +12,7 @@ include:
     ref: main
   - project: karabo/gitlabci
     file: .mirror-device.yml
+    ref: main
+  - project: karabo/gitlabci
+    file: .dependabot.yml
     ref: main
