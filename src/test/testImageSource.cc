@@ -180,11 +180,69 @@ TEST(UnpackTests, MonoXXp) {
     std::vector<uint8_t> packedData(3);
     std::vector<uint16_t> unpackedData(2);
 
-    ASSERT_THROW(karabo::util::unpackMonoXXp(packedData.data(), 2, 1, 8, unpackedData.data()),
+    ASSERT_THROW(karabo::util::unpackAnyFormat(packedData.data(), 2, 8, unpackedData.data()),
                  karabo::util::ParameterException);
 
-    ASSERT_THROW(karabo::util::unpackMonoXXp(packedData.data(), 2, 1, 16, unpackedData.data()),
+    ASSERT_THROW(karabo::util::unpackAnyFormat(packedData.data(), 2, 16, unpackedData.data()),
                  karabo::util::ParameterException);
+}
+
+TEST(UnpackTests, BayerRG10p) {
+    std::vector<uint8_t> packedData(20);
+    std::vector<uint16_t> unpackedData(16); // 8 x 2 image
+
+    packedData = {
+        0b1, 0b100, 0b100000, 0b10000000, 0,
+        0b11, 0b1100, 0b1000000, 0, 0b1,
+        0b101, 0b10100, 0b1100000, 0b10000000, 0b1,
+        0b111, 0b11100, 0b10000000, 0, 0b10};
+
+    ASSERT_NO_THROW(karabo::util::unpackBayerRG10p(packedData.data(), 8, 2, unpackedData.data()));
+    ASSERT_EQ((uint16_t)0b1, unpackedData[0]); // pixel0
+    ASSERT_EQ((uint16_t)0b1, unpackedData[1]); // pixel1
+    ASSERT_EQ((uint16_t)0b10, unpackedData[2]); // pixel2
+    ASSERT_EQ((uint16_t)0b10, unpackedData[3]); // pixel3
+    ASSERT_EQ((uint16_t)0b11, unpackedData[4]); // pixel4
+    ASSERT_EQ((uint16_t)0b11, unpackedData[5]); // pixel5
+    ASSERT_EQ((uint16_t)0b100, unpackedData[6]); // pixel6
+    ASSERT_EQ((uint16_t)0b100, unpackedData[7]); // pixel7
+    ASSERT_EQ((uint16_t)0b101, unpackedData[8]); // pixel8
+    ASSERT_EQ((uint16_t)0b101, unpackedData[9]); // pixel9
+    ASSERT_EQ((uint16_t)0b110, unpackedData[10]); // pixel10
+    ASSERT_EQ((uint16_t)0b110, unpackedData[11]); // pixel11
+    ASSERT_EQ((uint16_t)0b111, unpackedData[12]); // pixel12
+    ASSERT_EQ((uint16_t)0b111, unpackedData[13]); // pixel13
+    ASSERT_EQ((uint16_t)0b1000, unpackedData[14]); // pixel14
+    ASSERT_EQ((uint16_t)0b1000, unpackedData[15]); // pixel15
+}
+
+TEST(UnpackTests, BayerRG12p) {
+    std::vector<uint8_t> packedData(24);
+    std::vector<uint16_t> unpackedData(16); // 8 x 2 image
+
+    packedData = {
+        0b1, 0b10000, 0, 0b10, 0b100000, 0,
+        0b11, 0b110000, 0, 0b100, 0b1000000, 0,
+        0b101, 0b1010000, 0, 0b110, 0b1100000, 0,
+        0b111, 0b1110000, 0, 0b1000, 0b10000000, 0};
+
+    ASSERT_NO_THROW(karabo::util::unpackBayerRG12p(packedData.data(), 8, 2, unpackedData.data()));
+    ASSERT_EQ((uint16_t)0b1, unpackedData[0]); // pixel0
+    ASSERT_EQ((uint16_t)0b1, unpackedData[1]); // pixel1
+    ASSERT_EQ((uint16_t)0b10, unpackedData[2]); // pixel2
+    ASSERT_EQ((uint16_t)0b10, unpackedData[3]); // pixel3
+    ASSERT_EQ((uint16_t)0b11, unpackedData[4]); // pixel4
+    ASSERT_EQ((uint16_t)0b11, unpackedData[5]); // pixel5
+    ASSERT_EQ((uint16_t)0b100, unpackedData[6]); // pixel6
+    ASSERT_EQ((uint16_t)0b100, unpackedData[7]); // pixel7
+    ASSERT_EQ((uint16_t)0b101, unpackedData[8]); // pixel8
+    ASSERT_EQ((uint16_t)0b101, unpackedData[9]); // pixel9
+    ASSERT_EQ((uint16_t)0b110, unpackedData[10]); // pixel10
+    ASSERT_EQ((uint16_t)0b110, unpackedData[11]); // pixel11
+    ASSERT_EQ((uint16_t)0b111, unpackedData[12]); // pixel12
+    ASSERT_EQ((uint16_t)0b111, unpackedData[13]); // pixel13
+    ASSERT_EQ((uint16_t)0b1000, unpackedData[14]); // pixel14
+    ASSERT_EQ((uint16_t)0b1000, unpackedData[15]); // pixel15
 }
 
 TEST(EncodeTests, EncodeJPEG) {

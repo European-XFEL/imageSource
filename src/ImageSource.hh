@@ -115,12 +115,14 @@ namespace karabo {
                                 uint16_t* unpackedData);
 
         /**
-         * @brief Unpack the input MonoXXp data to MONO12, where XX is usually
-         * 10 or 12.
+         * @brief Unpack the input image data by adding back the removed
+         * padding bits. An example are Mono10p and Mono12p formats, that are
+         * unpacked to MONO12. Another one are BayerRG10p and BayerRG12p,
+         * unpacked to BayerRG12.
          *
-         * In MonoXXp pixel data format, XX-bit pixel data are packed, with no
-         * padding bits in between. Padding 0s are added to the MSB if needed.
-         * For example Mono10p pixels are packed this way:
+         * In the Mono10p pixel data format - for example - the 10-bit-pixel
+         * data are packed as following. Padding 0s are added to the MSB if
+         * needed.
          *
          * @verbatim embed:rst:leading-asterisk
          *
@@ -141,17 +143,85 @@ namespace karabo {
          * @endverbatim
          *
          * @param data The pointer to the input packed data
-         * @param width The image width
-         * @param height The image height
+         * @param image_size The image size (width * height)
          * @param bpp The bits-per-pixel, normally 10 or 12
          * @param unpackedData The pointer to the output unpacked data
          */
-        void unpackMonoXXp(const uint8_t* data, const uint32_t width, const uint32_t height, const uint8_t bpp,
-                           uint16_t* unpackedData);
+        void unpackAnyFormat(const uint8_t* data, const size_t image_size, const uint8_t bpp, uint16_t* unpackedData);
 
-        // Specialize unpackMonoXXp for XX = 10, 12
+        // Specialize unpackAnyFormat Mono10p and Mono12p
         void unpackMono10p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
         void unpackMono12p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
+
+        /**
+         * @brief Unpack the input BayerRG10p data to BayerRG10.
+         *
+         * Since in BayerRG10p pixel data format there is no padding, 1.25 bytes/pixel are used,
+         * according to the following table:
+         *
+         * @verbatim embed:rst:leading-asterisk
+         *
+         * +------+---------------------+
+         * | Byte |  Pixel - Data bits  |
+         * +======+=====================+
+         * |  B0  |       R0 7...0      |
+         * +------+---------------------+
+         * |  B1  | G0 5...0 |  R0 9-8  |
+         * +------+---------------------+
+         * |  B2  | R1 3...0 | G0 9...6 |
+         * +------+---------------------+
+         * |  B3  |  G1 1-0  | R1 9...4 |
+         * +------+---------------------+
+         * |  B4  |       G1 9...2      |
+         * +------+---------------------+
+         * |  ... |         ...         |
+         * +------+---------------------+
+         * |  ... |  Bn 1-0  | Gn 9...4 |
+         * +------+---------------------+
+         * |  Bm  |       Bl 9...2      |
+         * +------+---------------------+
+         *
+         * @endverbatim
+         *
+         * @param data The pointer to the input packed data
+         * @param width The image width
+         * @param height The image height
+         * @param unpackedData The pointer to the output unpacked data
+         */
+        void unpackBayerRG10p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
+
+        /**
+         * @brief Unpack the input BayerRG12p data to BayerRG12.
+         *
+         * Since in BayerRG12p pixel data format there is no padding, 1.5 bytes/pixel are used,
+         * according to the following table:
+         *
+         * @verbatim embed:rst:leading-asterisk
+         *
+         * +------+----------------------+
+         * | Byte |   Pixel - Data bits  |
+         * +======+======================+
+         * |  B0  |       R0 7...0       |
+         * +------+----------------------+
+         * |  B1  | G0 3...0 | R0 11...8 |
+         * +------+----------------------+
+         * |  B2  |       G0 11...4      |
+         * +------+----------------------+
+         * |  ... |          ...         |
+         * +------+----------------------+
+         * |  ... | Bn 3...0 | Gn 11...8 |
+         * +------+----------------------+
+         * |  Bm  |       Bl 11...4      |
+         * +------+----------------------+
+         *
+         * @endverbatim
+         *
+         * @param data The pointer to the input packed data
+         * @param width The image width
+         * @param height The image height
+         * @param unpackedData The pointer to the output unpacked data
+         */
+        void unpackBayerRG12p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
 
         /**
          * @brief Decode a JPEG image to GRAY.
