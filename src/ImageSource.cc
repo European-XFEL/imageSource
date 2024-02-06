@@ -49,10 +49,7 @@ namespace karabo {
     }
 
     ImageSource::ImageSource(const karabo::util::Hash& config)
-        : Device<>(config),
-          m_shape(initial_shape),
-          m_encoding(initial_encoding),
-          m_kType(initial_kType) {}
+        : Device<>(config), m_shape(initial_shape), m_encoding(initial_encoding), m_kType(initial_kType) {}
 
     ImageSource::~ImageSource() {}
 
@@ -134,14 +131,13 @@ namespace karabo {
         }
     }
 
-    void util::unpackMonoXXp(const uint8_t* data, const uint32_t width, const uint32_t height, const uint8_t bpp,
-                             uint16_t* unpackedData) {
+    void util::unpackAnyFormat(const uint8_t* data, const size_t image_size, const uint8_t bpp, uint16_t* unpackedData) {
         if (bpp < 9 || bpp > 15) {
             throw KARABO_PARAMETER_EXCEPTION("Invalid bpp value: " + std::to_string(bpp) + ". It must be in [9, 15].");
         }
 
         const uint16_t mask = 0xFFFF >> (16 - bpp);
-        size_t bits = 0, px = 0, image_size = width * height;
+        size_t bits = 0, px = 0;
         while (px < image_size) {
             const size_t idx = bits / 8;
             const size_t shift = bits % 8;
@@ -153,11 +149,21 @@ namespace karabo {
     }
 
     void util::unpackMono10p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData) {
-        util::unpackMonoXXp(data, width, height, 10, unpackedData);
+        util::unpackAnyFormat(data, width * height, 10, unpackedData);
     }
 
     void util::unpackMono12p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData) {
-        util::unpackMonoXXp(data, width, height, 12, unpackedData);
+        util::unpackAnyFormat(data, width * height, 12, unpackedData);
+    }
+
+    void util::unpackBayerRG10p(const uint8_t* data, const uint32_t width, const uint32_t height,
+                                uint16_t* unpackedData) {
+        util::unpackAnyFormat(data, width * height, 10, unpackedData);
+    }
+
+    void util::unpackBayerRG12p(const uint8_t* data, const uint32_t width, const uint32_t height,
+                                uint16_t* unpackedData) {
+        util::unpackAnyFormat(data, width * height, 12, unpackedData);
     }
 
     void util::decodeJPEG(karabo::xms::ImageData& imd) {
@@ -395,7 +401,7 @@ namespace karabo {
             // Color images have 3 or 4 channels (e.g. RGB, YUV, RGBA)
             // XXX What about Bayer Formats?
             // (see https://en.wikipedia.org/wiki/Bayer_filter)
-            if (channels !=3 && channels != 4) {
+            if (channels != 3 && channels != 4) {
                 throw KARABO_NOT_IMPLEMENTED_EXCEPTION("Can only flip monochromatic/color images");
             }
         } else {
@@ -529,7 +535,7 @@ namespace karabo {
             // Color images have 3 or 4 channels (e.g. RGB, YUV, RGBA)
             // XXX What about Bayer Formats?
             // (see https://en.wikipedia.org/wiki/Bayer_filter)
-            if (channels !=3 && channels != 4) {
+            if (channels != 3 && channels != 4) {
                 throw KARABO_NOT_IMPLEMENTED_EXCEPTION("Can only flip monochromatic/color images");
             }
         } else {
