@@ -34,7 +34,7 @@ target_link_libraries(
     PUBLIC
     Threads::Threads
     ${KARABO_LIB_TARGET_NAME}
-    jpeg
+    $ENV{KARABO}/extern/lib/libjpeg.so
     $ENV{KARABO}/extern/lib64/libopencv_imgproc.so
     $ENV{KARABO}/extern/lib64/libopencv_core.so
 )
