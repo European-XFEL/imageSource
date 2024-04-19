@@ -50,10 +50,14 @@ namespace karabo {
          * @param encoding The image encoding, e.g. Encoding::GRAY.
          * @param roiOffsets The offset of the Region-of-Interest, e.g. (roiY, roiX).
          * @param timestamp The image timestamp.
+         * @param safeNDArray Boolean that should be set to 'true' if 'data' is not changed after this 'writeChannel'.    
+         *                    Otherwise, data will be copied if needed, i.e. when the output channel has to queue or
+         *                    serves inner-process receivers.
          */
         void writeChannels(const karabo::util::NDArray& data, const karabo::util::Dims& binning,
                            const unsigned short bpp, const karabo::xms::EncodingType& encoding,
-                           const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp);
+                           const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
+                           bool safeNDArray = false);
 
         KARABO_DEPRECATED void writeChannels(const karabo::util::NDArray& data, const karabo::util::Dims& binning,
                                              const unsigned short bpp, const karabo::xms::EncodingType& encoding,
@@ -79,6 +83,9 @@ namespace karabo {
                                   const std::string& displayedName, const std::vector<unsigned long long>& shape,
                                   const karabo::xms::EncodingType& encoding,
                                   const karabo::util::Types::ReferenceType& kType);
+
+        std::future<void> startDataSending(const char* channelName, karabo::xms::ImageData& imageData,
+                                           const karabo::util::Timestamp& timestamp, bool safeNDArray);
     };
 
     namespace util {
