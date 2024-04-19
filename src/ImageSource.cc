@@ -7,6 +7,7 @@
  */
 
 #include <cstdio>
+#include <future>
 
 extern "C" {
 #include <jpeglib.h>
@@ -97,22 +98,38 @@ namespace karabo {
         OUTPUT_CHANNEL(schemaUpdate).key(nodeKey).displayedName(displayedName).dataSchema(dataSchema).commit();
     }
 
+    std::future<void> ImageSource::startDataSending(const char* channelName, karabo::xms::ImageData& imageData,
+                                                    const Timestamp& timestamp, bool safeNDArray) {
+        const OutputChannel::Pointer channel = this->getOutputChannel(channelName);
+        const xms::OutputChannel::MetaData meta{m_instanceId + ":" + channelName, timestamp};
+        channel->write(Hash{"data.image", imageData}, meta);
+
+        auto output_promise = std::make_shared<std::promise<void>>();
+        auto output_future = output_promise->get_future();
+        channel->asyncUpdate(safeNDArray, [output_promise]() { output_promise->set_value(); });
+
+        return output_future;
+    }
+
     void ImageSource::writeChannels(const NDArray& data, const Dims& binning, const unsigned short bpp,
-                                    const EncodingType& encoding, const Dims& roiOffsets, const Timestamp& timestamp) {
+                                    const EncodingType& encoding, const Dims& roiOffsets,
+                                    const karabo::util::Timestamp& timestamp, bool safeNDArray) {
         karabo::xms::ImageData imageData(data, encoding);
         imageData.setBitsPerPixel(bpp);
         imageData.setROIOffsets(roiOffsets);
         imageData.setBinning(binning);
 
-        this->writeChannel("output", Hash("data.image", imageData), timestamp);
+        const std::future<void> output_future = this->startDataSending("output", imageData, timestamp, safeNDArray);
 
         // NB DAQ wants fastest changing index first, e.g. (width, height) or
         // (channel, width, height)
         Dims daqShape = data.getShape();
         daqShape.reverse();
-
         imageData.setDimensions(daqShape);
-        this->writeChannel("daqOutput", Hash("data.image", imageData), timestamp);
+        const std::future<void> daq_future = this->startDataSending("daqOutput", imageData, timestamp, safeNDArray);
+
+        output_future.wait();
+        daq_future.wait();
     }
 
     void ImageSource::signalEOS() {
@@ -131,7 +148,8 @@ namespace karabo {
         }
     }
 
-    void util::unpackAnyFormat(const uint8_t* data, const size_t image_size, const uint8_t bpp, uint16_t* unpackedData) {
+    void util::unpackAnyFormat(const uint8_t* data, const size_t image_size, const uint8_t bpp,
+                               uint16_t* unpackedData) {
         if (bpp < 9 || bpp > 15) {
             throw KARABO_PARAMETER_EXCEPTION("Invalid bpp value: " + std::to_string(bpp) + ". It must be in [9, 15].");
         }
