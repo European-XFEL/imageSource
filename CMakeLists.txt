@@ -1,3 +1,9 @@
+# This file is intended to be used together with Karabo:
+#
+# http://www.karabo.eu
+#
+# IF YOU REQUIRE ANY LICENSING AND COPYRIGHT TERMS, PLEASE ADD THEM HERE.
+# Karabo itself is licensed under the terms of the MPL 2.0 license.
 # To disable building of tests, please set the cache variable BUILD_TESTS to
 # 0 from the cmake configuration command-line. The default is to BUILD_TESTS.
 
@@ -10,7 +16,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Creates file "compile_commands.json" in the build directory. It is useful
@@ -35,8 +40,6 @@ if (NOT DEFINED ENV{KARABO} OR NOT EXISTS $ENV{KARABO})
   endif()
 endif()
 
-# Creates an IMPORTED target for the Karabo Framework Library and stores the
-# target name in the variable KARABO_LIB_TARGET_NAME to be used downstream.
 find_package(PkgConfig)
 set(PKG_CONFIG_ARGN "--define-variable=KARABO=$ENV{KARABO}")
 set(ENV{PKG_CONFIG_PATH} "$ENV{KARABO}/lib:$ENV{PKG_CONFIG_PATH}")
@@ -52,7 +55,7 @@ if (karabo_FOUND)
         INTERFACE_COMPILE_DEFINITIONS "__SO__"
         INTERFACE_COMPILE_OPTIONS "-Wfatal-errors;-Wno-unused-local-typedefs;-Wno-deprecated-declarations;-Wall"
         INTERFACE_INCLUDE_DIRECTORIES "$ENV{KARABO}/include;$ENV{KARABO}/extern/include"
-        INTERFACE_LINK_DIRECTORIES "$ENV{KARABO}/lib;$ENV{KARABO}/extern/lib"
+        INTERFACE_LINK_DIRECTORIES "$ENV{KARABO}/lib;$ENV{KARABO}/extern/lib;$ENV{KARABO}/extern/lib64"
     )
 else()
     # If using pkg-config fails,
