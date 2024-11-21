@@ -11,6 +11,9 @@ include:
     file: .cpp-ci.yml
     ref: main
   - project: karabo/gitlabci
+    file: .cpp-package.yml
+    ref: main
+  - project: karabo/gitlabci
     file: .mirror-device.yml
     ref: main
   - project: karabo/gitlabci
