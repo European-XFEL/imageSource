@@ -54,6 +54,8 @@ src/version.hh
 # Exception for .install.sh
 !.install.sh
 
+localdist/
+package/
 __pycache__/
 
 # Test artefacts
