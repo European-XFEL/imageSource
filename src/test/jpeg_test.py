@@ -19,7 +19,7 @@ class Jpeg_TestCase(unittest.TestCase):
 
             data1 = np.fromfile(in_file, dtype=np.uint8).reshape(data2.shape)
 
-            diff = data2.astype(np.float) - data1.astype(np.float)
+            diff = data2.astype(np.float64) - data1.astype(np.float64)
 
             # Verify that images are similar:
             # not more than 10% of the pixel can differ by more than 10 counts
@@ -35,7 +35,7 @@ class Jpeg_TestCase(unittest.TestCase):
         data1 = np.fromfile(in_file, dtype=np.uint16).reshape(data2.shape)
         data1 = data1 / 256  # 16 -> 8 bpp
 
-        diff = data2.astype(np.float) - data1.astype(np.float)
+        diff = data2.astype(np.float64) - data1.astype(np.float64)
 
         # Verify that images are similar:
         # not more than 10% of the pixel can differ by more than 10 counts
@@ -54,7 +54,7 @@ class Jpeg_TestCase(unittest.TestCase):
 
             data2 = np.fromfile(out_file, dtype=np.uint8).reshape(data1.shape)
 
-            diff = data2.astype(np.float) - data1.astype(np.float)
+            diff = data2.astype(np.float64) - data1.astype(np.float64)
 
             # Verify that images are similar:
             # not more than 10% of the pixel can differ by more than 10 counts
