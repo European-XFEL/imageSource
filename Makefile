@@ -30,3 +30,4 @@ test: install
 	cmake .. -DBUILD_TESTS=1 && \
 	cmake --build . && \
 	cd imageSource && CTEST_OUTPUT_ON_FAILURE=1 ctest -VV
+	pytest src/test/
