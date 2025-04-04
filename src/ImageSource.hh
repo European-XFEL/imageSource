@@ -75,9 +75,6 @@ namespace karabo {
 
        private:
         boost::mutex m_updateSchemaMtx; // Protect from concurrent updateOutputSchema calls
-        std::vector<unsigned long long> m_shape;
-        int m_encoding;
-        int m_kType;
 
         void schema_update_helper(karabo::util::Schema& schemaUpdate, const std::string& nodeKey,
                                   const std::string& displayedName, const std::vector<unsigned long long>& shape,
