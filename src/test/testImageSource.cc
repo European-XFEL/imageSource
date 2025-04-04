@@ -26,6 +26,27 @@
 
 using namespace ::testing;
 
+/*
+ * This is a helper class to test ImageSource::updateOutputSchema. The
+ * function cannot be tested directly as it is a protected member of
+ * ImageSource.
+ */
+class ImageSource2 : public karabo::ImageSource {
+   public:
+    KARABO_CLASSINFO(ImageSource2, "ImageSource2", "1.0")
+
+    explicit ImageSource2(const karabo::util::Hash& config) : karabo::ImageSource(config) {};
+
+    void updateOutputSchemaPublic(const std::vector<unsigned long long>& shape, const karabo::xms::EncodingType& encoding,
+                                  const karabo::util::Types::ReferenceType& kType) {
+        this->updateOutputSchema(shape, encoding, kType);
+   }
+};
+
+
+KARABO_REGISTER_FOR_CONFIGURATION(karabo::core::BaseDevice, karabo::core::Device<>, karabo::ImageSource, ImageSource2)
+
+
 /**
  * @brief Test fixture for the ImageSource device class.
  */
@@ -43,9 +64,9 @@ class ImageSourceFixture : public KaraboDeviceFixture {
 
 
         // instantiate the device to be tested
-        instantiateAndGetPointer("ImageSource", TEST_DEVICE_ID, devCfg, base_device);
+        instantiateAndGetPointer("ImageSource2", TEST_DEVICE_ID, devCfg, base_device);
         // cast the BaseDevice::Pointer to the derived mocked class Pointer
-        imgsrc_device = boost::dynamic_pointer_cast<karabo::ImageSource>(base_device);
+        imgsrc_device = boost::dynamic_pointer_cast<ImageSource2>(base_device);
 
         /**
          * Add default expectations for this test fixture here
@@ -59,7 +80,7 @@ class ImageSourceFixture : public KaraboDeviceFixture {
     }
 
     karabo::core::BaseDevice::Pointer base_device;
-    karabo::ImageSource::Pointer imgsrc_device;
+    ImageSource2::Pointer imgsrc_device;
 };
 
 // test only that device instantiates
@@ -74,10 +95,27 @@ TEST_F(ImageSourceFixture, testDeviceInstantiation) {
     std::cout << std::endl;
     std::cout << std::endl;
 
-    ASSERT_STREQ(cls.c_str(), "ImageSource");
+    ASSERT_STREQ(cls.c_str(), "ImageSource2");
 }
 
 // arguments to TEST are just strings to name your tests
+TEST_F(ImageSourceFixture, testSchemaUpdate) {
+    const std::vector<unsigned long long> shape = {1080, 1920};
+    const karabo::xms::EncodingType encoding = karabo::xms::Encoding::RGB;
+    const karabo::util::Types::ReferenceType kType = karabo::util::Types::UINT8;
+
+    const karabo::util::Schema& schema = imgsrc_device->getFullSchema();
+    ASSERT_NE(shape, schema.getDefaultValue<std::vector<unsigned long long>>("output.schema.data.image.dims"));
+    ASSERT_NE(encoding, schema.getDefaultValue<int>("output.schema.data.image.encoding"));
+    ASSERT_NE(kType, schema.getDefaultValue<int>("output.schema.data.image.pixels.type"));
+
+    imgsrc_device->updateOutputSchemaPublic(shape, encoding, kType);
+    const karabo::util::Schema& updated_schema = imgsrc_device->getFullSchema();
+    ASSERT_EQ(shape, updated_schema.getDefaultValue<std::vector<unsigned long long>>("output.schema.data.image.dims"));
+    ASSERT_EQ(encoding, updated_schema.getDefaultValue<int>("output.schema.data.image.encoding"));
+    ASSERT_EQ(kType, updated_schema.getDefaultValue<int>("output.schema.data.image.pixels.type"));
+}
+
 TEST(UnpackTests, Mono12Packed) {
     std::vector<uint8_t> packedData(3);
     std::vector<uint16_t> unpackedData(2);

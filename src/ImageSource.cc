@@ -50,7 +50,7 @@ namespace karabo {
     }
 
     ImageSource::ImageSource(const karabo::util::Hash& config)
-        : Device<>(config), m_shape(initial_shape), m_encoding(initial_encoding), m_kType(initial_kType) {}
+        : Device<>(config) {}
 
     ImageSource::~ImageSource() {}
 
@@ -58,7 +58,12 @@ namespace karabo {
                                          const Types::ReferenceType& kType) {
         boost::mutex::scoped_lock lock(m_updateSchemaMtx);
 
-        if (shape == m_shape && encoding == m_encoding && kType == m_kType) {
+        const Schema& schema = this->getFullSchema();
+        const std::vector<unsigned long long>& currentShape = schema.getDefaultValue<std::vector<unsigned long long>>("output.schema.data.image.dims");
+        const int currentEncoding = schema.getDefaultValue<int>("output.schema.data.image.encoding");
+        const int currentKType = schema.getDefaultValue<int>("output.schema.data.image.pixels.type");
+
+        if (shape == currentShape && encoding == currentEncoding && kType == currentKType) {
             // Nothing to be updated
             KARABO_LOG_FRAMEWORK_DEBUG << "No need to update the output schema";
             return;
@@ -74,10 +79,6 @@ namespace karabo {
         this->schema_update_helper(schemaUpdate, "daqOutput", "DAQ Output", daqShape, encoding, kType);
 
         this->appendSchema(schemaUpdate);
-
-        m_shape = shape;
-        m_encoding = encoding;
-        m_kType = kType;
     }
 
     void ImageSource::schema_update_helper(Schema& schemaUpdate, const std::string& nodeKey,
