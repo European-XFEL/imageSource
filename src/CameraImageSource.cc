@@ -16,7 +16,7 @@ USING_KARABO_NAMESPACES;
 
 namespace karabo {
 
-    KARABO_REGISTER_FOR_CONFIGURATION(BaseDevice, Device<>, ImageSource, CameraImageSource)
+    KARABO_REGISTER_FOR_CONFIGURATION(Device, ImageSource, CameraImageSource)
 
 
     void CameraImageSource::expectedParameters(Schema& expected) {
@@ -32,16 +32,16 @@ namespace karabo {
     }
 
 
-    CameraImageSource::CameraImageSource(const karabo::util::Hash& config) : ImageSource(config) {
-        KARABO_SLOT(requestScene, karabo::util::Hash)
-        this->registerScene(boost::bind(&Self::scene, this), "scene");
+    CameraImageSource::CameraImageSource(const karabo::data::Hash& config) : ImageSource(config) {
+        KARABO_SLOT(requestScene, karabo::data::Hash)
+        this->registerScene(std::bind(&Self::scene, this), "scene");
     }
 
 
     CameraImageSource::~CameraImageSource() {}
 
 
-    void CameraImageSource::requestScene(const karabo::util::Hash& params) {
+    void CameraImageSource::requestScene(const karabo::data::Hash& params) {
         /* Fulfill a scene request from another device.
          */
         KARABO_LOG_FRAMEWORK_INFO << "received requestScene" << params;
@@ -58,7 +58,7 @@ namespace karabo {
         // NOTE: This is overkill for the moment since there is only one scene.
         if (it != m_scenes.end()) {
             const SceneFunction& f = it->second;
-            if (!f.empty()) {
+            if (f) {
                 payload.set("success", true);
                 payload.set("name", it->first);
                 payload.set("data", f());

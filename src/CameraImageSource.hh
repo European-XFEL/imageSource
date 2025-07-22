@@ -23,20 +23,20 @@ namespace karabo {
        public:
         KARABO_CLASSINFO(CameraImageSource, "CameraImageSource", IMAGESOURCE_PACKAGE_VERSION)
 
-        static void expectedParameters(karabo::util::Schema& expected);
+        static void expectedParameters(karabo::data::Schema& expected);
 
-        explicit CameraImageSource(const karabo::util::Hash& config);
+        explicit CameraImageSource(const karabo::data::Hash& config);
 
         virtual ~CameraImageSource();
 
        private:
         // implement scene map protocol
-        using SceneFunction = boost::function<std::string()>;
+        using SceneFunction = std::function<std::string()>;
         using SceneMap = std::map<std::string, SceneFunction>;
         SceneMap m_scenes;
 
        protected:
-        void requestScene(const karabo::util::Hash& params);
+        void requestScene(const karabo::data::Hash& params);
         void registerScene(const SceneFunction& sceneFunction, const std::string& funcName);
         // the main scene
         std::string scene();

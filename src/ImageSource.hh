@@ -11,6 +11,8 @@
 
 #include <karabo/karabo.hpp>
 
+#include <boost/thread/mutex.hpp>
+
 #include "version.hh" // provides IMAGESOURCE_PACKAGE_VERSION
 
 /**
@@ -18,13 +20,13 @@
  */
 namespace karabo {
 
-    class ImageSource : public karabo::core::Device<> {
+    class ImageSource : public karabo::core::Device {
        public:
         KARABO_CLASSINFO(ImageSource, "ImageSource", IMAGESOURCE_PACKAGE_VERSION)
 
-        static void expectedParameters(karabo::util::Schema& expected);
+        static void expectedParameters(karabo::data::Schema& expected);
 
-        explicit ImageSource(const karabo::util::Hash& config);
+        explicit ImageSource(const karabo::data::Hash& config);
 
         virtual ~ImageSource();
 
@@ -38,8 +40,8 @@ namespace karabo {
          * Encoding::RGB.
          * @param kType The image data type, e.g. Types::UINT16.
          */
-        void updateOutputSchema(const std::vector<unsigned long long>& shape, const karabo::xms::EncodingType& encoding,
-                                const karabo::util::Types::ReferenceType& kType);
+        void updateOutputSchema(const std::vector<unsigned long long>& shape, const karabo::xms::Encoding& encoding,
+                                const karabo::data::Types::ReferenceType& kType);
 
         /**
          * @brief Write the image and its metadata to the output channels.
@@ -54,18 +56,10 @@ namespace karabo {
          *                    Otherwise, data will be copied if needed, i.e. when the output channel has to queue or
          *                    serves inner-process receivers.
          */
-        void writeChannels(const karabo::util::NDArray& data, const karabo::util::Dims& binning,
-                           const unsigned short bpp, const karabo::xms::EncodingType& encoding,
-                           const karabo::util::Dims& roiOffsets, const karabo::util::Timestamp& timestamp,
+        void writeChannels(const karabo::data::NDArray& data, const karabo::data::Dims& binning,
+                           const unsigned short bpp, const karabo::xms::Encoding& encoding,
+                           const karabo::data::Dims& roiOffsets, const karabo::data::Timestamp& timestamp,
                            bool safeNDArray = false);
-
-        KARABO_DEPRECATED void writeChannels(const karabo::util::NDArray& data, const karabo::util::Dims& binning,
-                                             const unsigned short bpp, const karabo::xms::EncodingType& encoding,
-                                             const karabo::util::Dims& roiOffsets,
-                                             const karabo::util::Timestamp& timestamp,
-                                             const karabo::util::Hash& header) {
-            this->writeChannels(data, binning, bpp, encoding, roiOffsets, timestamp);
-        }
 
         /**
          * @brief Send an end-of-stream signal to 'output' and 'daqOutput' channels
@@ -76,13 +70,13 @@ namespace karabo {
        private:
         boost::mutex m_updateSchemaMtx; // Protect from concurrent updateOutputSchema calls
 
-        void schema_update_helper(karabo::util::Schema& schemaUpdate, const std::string& nodeKey,
+        void schema_update_helper(karabo::data::Schema& schemaUpdate, const std::string& nodeKey,
                                   const std::string& displayedName, const std::vector<unsigned long long>& shape,
-                                  const karabo::xms::EncodingType& encoding,
-                                  const karabo::util::Types::ReferenceType& kType);
+                                  const karabo::xms::Encoding& encoding,
+                                  const karabo::data::Types::ReferenceType& kType);
 
         std::future<void> startDataSending(const char* channelName, karabo::xms::ImageData& imageData,
-                                           const karabo::util::Timestamp& timestamp, bool safeNDArray);
+                                           const karabo::data::Timestamp& timestamp, bool safeNDArray);
     };
 
     namespace util {
@@ -270,7 +264,7 @@ namespace karabo {
          *
          */
         template <class T>
-        void rotate_image(karabo::util::NDArray& arr, unsigned int angle, void* buffer = nullptr);
+        void rotate_image(karabo::data::NDArray& arr, unsigned int angle, void* buffer = nullptr);
 
         /**
          * @brief Flip an image in X and/or Y.
@@ -302,7 +296,7 @@ namespace karabo {
          *
          */
         template <class T>
-        void flip_image(karabo::util::NDArray& arr, bool flipX, bool flipY, void* buffer = nullptr);
+        void flip_image(karabo::data::NDArray& arr, bool flipX, bool flipY, void* buffer = nullptr);
 
     } // namespace util
 } // namespace karabo

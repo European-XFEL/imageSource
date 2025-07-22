@@ -24,10 +24,10 @@ USING_KARABO_NAMESPACES;
 namespace karabo {
 
     const std::vector<unsigned long long> initial_shape = {1, 1};
-    const EncodingType initial_encoding = Encoding::GRAY;
+    const Encoding initial_encoding = Encoding::GRAY;
     const Types::ReferenceType initial_kType = Types::UINT16;
 
-    KARABO_REGISTER_FOR_CONFIGURATION(BaseDevice, Device<>, ImageSource)
+    KARABO_REGISTER_FOR_CONFIGURATION(Device, ImageSource)
 
     void ImageSource::expectedParameters(Schema& expected) {
         Schema data;
@@ -49,12 +49,12 @@ namespace karabo {
         OUTPUT_CHANNEL(expected).key("daqOutput").displayedName("DAQ Output").dataSchema(data).commit();
     }
 
-    ImageSource::ImageSource(const karabo::util::Hash& config)
-        : Device<>(config) {}
+    ImageSource::ImageSource(const karabo::data::Hash& config)
+        : Device(config) {}
 
     ImageSource::~ImageSource() {}
 
-    void ImageSource::updateOutputSchema(const std::vector<unsigned long long>& shape, const EncodingType& encoding,
+    void ImageSource::updateOutputSchema(const std::vector<unsigned long long>& shape, const Encoding& encoding,
                                          const Types::ReferenceType& kType) {
         boost::mutex::scoped_lock lock(m_updateSchemaMtx);
 
@@ -63,7 +63,7 @@ namespace karabo {
         const int currentEncoding = schema.getDefaultValue<int>("output.schema.data.image.encoding");
         const int currentKType = schema.getDefaultValue<int>("output.schema.data.image.pixels.type");
 
-        if (shape == currentShape && encoding == currentEncoding && kType == currentKType) {
+        if (shape == currentShape && static_cast<const int>(encoding) == currentEncoding && kType == currentKType) {
             // Nothing to be updated
             KARABO_LOG_FRAMEWORK_DEBUG << "No need to update the output schema";
             return;
@@ -83,7 +83,7 @@ namespace karabo {
 
     void ImageSource::schema_update_helper(Schema& schemaUpdate, const std::string& nodeKey,
                                            const std::string& displayedName,
-                                           const std::vector<unsigned long long>& shape, const EncodingType& encoding,
+                                           const std::vector<unsigned long long>& shape, const Encoding& encoding,
                                            const Types::ReferenceType& kType) {
         Schema dataSchema;
         NODE_ELEMENT(dataSchema).key("data").displayedName("Data").setDaqDataType(DaqDataType::TRAIN).commit();
@@ -113,8 +113,8 @@ namespace karabo {
     }
 
     void ImageSource::writeChannels(const NDArray& data, const Dims& binning, const unsigned short bpp,
-                                    const EncodingType& encoding, const Dims& roiOffsets,
-                                    const karabo::util::Timestamp& timestamp, bool safeNDArray) {
+                                    const Encoding& encoding, const Dims& roiOffsets,
+                                    const karabo::data::Timestamp& timestamp, bool safeNDArray) {
         karabo::xms::ImageData imageData(data, encoding);
         imageData.setBitsPerPixel(bpp);
         imageData.setROIOffsets(roiOffsets);
@@ -269,7 +269,7 @@ namespace karabo {
         cinfo.err = jpeg_std_error(&jerr);
         jpeg_create_compress(&cinfo);
 
-        const int encoding = imd.getEncoding();
+        const Encoding encoding = imd.getEncoding();
         switch (encoding) {
             case Encoding::GRAY:
                 cinfo.input_components = 1;
@@ -280,7 +280,7 @@ namespace karabo {
                 cinfo.in_color_space = JCS_RGB;
                 break;
             default:
-                throw KARABO_PARAMETER_EXCEPTION("Conversion from " + toString(encoding) +
+                throw KARABO_PARAMETER_EXCEPTION("Conversion from " + toString(static_cast<int>(encoding)) +
                                                  " to JPEG is not implemented.");
         }
 
@@ -386,8 +386,8 @@ namespace karabo {
             imd.setFlipX(flipY);
         }
 
-        int rotation = imd.getRotation();
-        if (rotation != Rotation::UNDEFINED) {
+        if (imd.getRotation() != Rotation::UNDEFINED) {
+            int rotation = static_cast<int>(imd.getRotation());
             rotation = (rotation + angle) % 360;
             switch (rotation) {
                 case 0:
@@ -409,7 +409,7 @@ namespace karabo {
     }
 
     template <class T>
-    void util::rotate_image(karabo::util::NDArray& arr, unsigned int angle, void* buffer) {
+    void util::rotate_image(karabo::data::NDArray& arr, unsigned int angle, void* buffer) {
         const Dims shape = arr.getShape();
         unsigned long long channels;
         if (shape.rank() == 2) {
@@ -543,7 +543,7 @@ namespace karabo {
     }
 
     template <class T>
-    void util::flip_image(karabo::util::NDArray& arr, bool flipX, bool flipY, void* buffer) {
+    void util::flip_image(karabo::data::NDArray& arr, bool flipX, bool flipY, void* buffer) {
         const Dims shape = arr.getShape();
         unsigned long long channels;
         if (shape.rank() == 2) {
