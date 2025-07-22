@@ -8,13 +8,13 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <thread>
 #include <utility>
 
 #include "CameraImageSource.hh"
 #include "ImageSource.hh"
-#include "karabo/util/Hash.hh"
+#include "karabo/data/types/Hash.hh"
 #include "testrunner.hh"
 
 
@@ -35,16 +35,16 @@ class ImageSource2 : public karabo::ImageSource {
    public:
     KARABO_CLASSINFO(ImageSource2, "ImageSource2", "1.0")
 
-    explicit ImageSource2(const karabo::util::Hash& config) : karabo::ImageSource(config) {};
+    explicit ImageSource2(const karabo::data::Hash& config) : karabo::ImageSource(config) {};
 
-    void updateOutputSchemaPublic(const std::vector<unsigned long long>& shape, const karabo::xms::EncodingType& encoding,
-                                  const karabo::util::Types::ReferenceType& kType) {
+    void updateOutputSchemaPublic(const std::vector<unsigned long long>& shape, const karabo::xms::Encoding& encoding,
+                                  const karabo::data::Types::ReferenceType& kType) {
         this->updateOutputSchema(shape, encoding, kType);
    }
 };
 
 
-KARABO_REGISTER_FOR_CONFIGURATION(karabo::core::BaseDevice, karabo::core::Device<>, karabo::ImageSource, ImageSource2)
+KARABO_REGISTER_FOR_CONFIGURATION(karabo::core::Device, karabo::ImageSource, ImageSource2)
 
 
 /**
@@ -55,7 +55,7 @@ class ImageSourceFixture : public KaraboDeviceFixture {
     ImageSourceFixture() = default;
 
     void SetUp() {
-        karabo::util::Hash devCfg("_deviceId_", TEST_DEVICE_ID);
+        karabo::data::Hash devCfg("deviceId", TEST_DEVICE_ID);
 
         /**
          * Add configuration for this 'DefaultCfg' test fixture
@@ -65,8 +65,8 @@ class ImageSourceFixture : public KaraboDeviceFixture {
 
         // instantiate the device to be tested
         instantiateAndGetPointer("ImageSource2", TEST_DEVICE_ID, devCfg, base_device);
-        // cast the BaseDevice::Pointer to the derived mocked class Pointer
-        imgsrc_device = boost::dynamic_pointer_cast<ImageSource2>(base_device);
+        // cast the Device::Pointer to the derived mocked class Pointer
+        imgsrc_device = std::dynamic_pointer_cast<ImageSource2>(base_device);
 
         /**
          * Add default expectations for this test fixture here
@@ -79,13 +79,13 @@ class ImageSourceFixture : public KaraboDeviceFixture {
         //<< "Failed to deinstantiate device '" << TEST_DEVICE_ID << "'";
     }
 
-    karabo::core::BaseDevice::Pointer base_device;
+    karabo::core::Device::Pointer base_device;
     ImageSource2::Pointer imgsrc_device;
 };
 
 // test only that device instantiates
 TEST_F(ImageSourceFixture, testDeviceInstantiation) {
-    karabo::util::Hash result = m_deviceCli->get(TEST_DEVICE_ID);
+    karabo::data::Hash result = m_deviceCli->get(TEST_DEVICE_ID);
     std::string cls = result.get<std::string>("classId");
     std::string clsVer = result.get<std::string>("classVersion");
 
@@ -101,18 +101,18 @@ TEST_F(ImageSourceFixture, testDeviceInstantiation) {
 // arguments to TEST are just strings to name your tests
 TEST_F(ImageSourceFixture, testSchemaUpdate) {
     const std::vector<unsigned long long> shape = {1080, 1920};
-    const karabo::xms::EncodingType encoding = karabo::xms::Encoding::RGB;
-    const karabo::util::Types::ReferenceType kType = karabo::util::Types::UINT8;
+    const karabo::xms::Encoding encoding = karabo::xms::Encoding::RGB;
+    const karabo::data::Types::ReferenceType kType = karabo::data::Types::UINT8;
 
-    const karabo::util::Schema& schema = imgsrc_device->getFullSchema();
+    const karabo::data::Schema& schema = imgsrc_device->getFullSchema();
     ASSERT_NE(shape, schema.getDefaultValue<std::vector<unsigned long long>>("output.schema.data.image.dims"));
-    ASSERT_NE(encoding, schema.getDefaultValue<int>("output.schema.data.image.encoding"));
+    ASSERT_NE(static_cast<int>(encoding), schema.getDefaultValue<int>("output.schema.data.image.encoding"));
     ASSERT_NE(kType, schema.getDefaultValue<int>("output.schema.data.image.pixels.type"));
 
     imgsrc_device->updateOutputSchemaPublic(shape, encoding, kType);
-    const karabo::util::Schema& updated_schema = imgsrc_device->getFullSchema();
+    const karabo::data::Schema& updated_schema = imgsrc_device->getFullSchema();
     ASSERT_EQ(shape, updated_schema.getDefaultValue<std::vector<unsigned long long>>("output.schema.data.image.dims"));
-    ASSERT_EQ(encoding, updated_schema.getDefaultValue<int>("output.schema.data.image.encoding"));
+    ASSERT_EQ(static_cast<int>(encoding), updated_schema.getDefaultValue<int>("output.schema.data.image.encoding"));
     ASSERT_EQ(kType, updated_schema.getDefaultValue<int>("output.schema.data.image.pixels.type"));
 }
 
@@ -219,10 +219,10 @@ TEST(UnpackTests, MonoXXp) {
     std::vector<uint16_t> unpackedData(2);
 
     ASSERT_THROW(karabo::util::unpackAnyFormat(packedData.data(), 2, 8, unpackedData.data()),
-                 karabo::util::ParameterException);
+                 karabo::data::ParameterException);
 
     ASSERT_THROW(karabo::util::unpackAnyFormat(packedData.data(), 2, 16, unpackedData.data()),
-                 karabo::util::ParameterException);
+                 karabo::data::ParameterException);
 }
 
 TEST(UnpackTests, BayerRG10p) {
@@ -285,6 +285,7 @@ TEST(UnpackTests, BayerRG12p) {
 
 TEST(EncodeTests, EncodeJPEG) {
     using namespace karabo::util;
+    using namespace karabo::data;
     using namespace karabo::xms;
 
     const std::string inImage1("../../src/test/gray21.512.raw"); // grayscale data
@@ -311,7 +312,7 @@ TEST(EncodeTests, EncodeJPEG) {
         // Decode JPEG
         ASSERT_NO_THROW(karabo::util::encodeJPEG(imd));
 
-        ASSERT_EQ((int)Encoding::JPEG, imd.getEncoding());
+        ASSERT_EQ(Encoding::JPEG, imd.getEncoding());
         ASSERT_EQ(false, imd.isIndexable());
         ASSERT_EQ((size_t)2, imd.getDimensions().rank());
         ASSERT_EQ(512ull, imd.getDimensions().x1());
@@ -355,7 +356,7 @@ TEST(EncodeTests, EncodeJPEG) {
         // Decode JPEG
         ASSERT_NO_THROW(karabo::util::encodeJPEG(imd));
 
-        ASSERT_EQ((int)Encoding::JPEG, imd.getEncoding());
+        ASSERT_EQ(Encoding::JPEG, imd.getEncoding());
         ASSERT_EQ(false, imd.isIndexable());
         ASSERT_EQ((size_t)3, imd.getDimensions().rank());
         ASSERT_EQ(512ull, imd.getDimensions().x1());
@@ -400,7 +401,7 @@ TEST(EncodeTests, EncodeJPEG) {
         // Decode JPEG
         ASSERT_NO_THROW(karabo::util::encodeJPEG(imd));
 
-        ASSERT_EQ((int)Encoding::JPEG, imd.getEncoding());
+        ASSERT_EQ(Encoding::JPEG, imd.getEncoding());
         ASSERT_EQ(false, imd.isIndexable());
         ASSERT_EQ((size_t)3, imd.getDimensions().rank());
         ASSERT_EQ(512ull, imd.getDimensions().x1());
@@ -424,6 +425,7 @@ TEST(EncodeTests, EncodeJPEG) {
 
 TEST(EncodeTests, DecodeJPEG) {
     using namespace karabo::util;
+    using namespace karabo::data;
     using namespace karabo::xms;
 
     const std::string inImage1("../../src/test/gray_test.jpg"); // created by previous test
@@ -450,7 +452,7 @@ TEST(EncodeTests, DecodeJPEG) {
         // Decode JPEG
         ASSERT_NO_THROW(karabo::util::decodeJPEG(imd));
 
-        ASSERT_EQ((int)Encoding::GRAY, imd.getEncoding());
+        ASSERT_EQ(Encoding::GRAY, imd.getEncoding());
         ASSERT_EQ(true, imd.isIndexable());
         ASSERT_EQ((size_t)2, imd.getDimensions().rank());
         ASSERT_EQ(512ull, imd.getDimensions().x1());
@@ -494,7 +496,7 @@ TEST(EncodeTests, DecodeJPEG) {
         // Decode JPEG
         ASSERT_NO_THROW(karabo::util::decodeJPEG(imd));
 
-        // ASSERT_EQ((int)Encoding::RGB, imd.getEncoding());
+        // ASSERT_EQ(Encoding::RGB, imd.getEncoding());
         ASSERT_EQ(true, imd.isIndexable());
         ASSERT_EQ((size_t)3, imd.getDimensions().rank());
         ASSERT_EQ(512ull, imd.getDimensions().x1());
@@ -518,6 +520,7 @@ TEST(EncodeTests, DecodeJPEG) {
 
 TEST(RotateTests, Rotate) {
     using namespace karabo::util;
+    using namespace karabo::data;
     using namespace karabo::xms;
 
     // Test 90 degrees rotation
@@ -537,7 +540,7 @@ TEST(RotateTests, Rotate) {
         ASSERT_EQ(shape.x2(), arr_out.getShape().x1());
         ASSERT_EQ(shape.x1(), arr_out.getShape().x2());
         ASSERT_EQ(shape.rank(), arr_out.getShape().rank());
-        ASSERT_EQ(int(Rotation::ROT_90), imd.getRotation());
+        ASSERT_EQ(Rotation::ROT_90, imd.getRotation());
         for (size_t i = 0; i < 12; ++i) {
             ASSERT_EQ(expected_data[i], data_out[i]);
         }
@@ -561,7 +564,7 @@ TEST(RotateTests, Rotate) {
         ASSERT_EQ(shape.x1(), arr_out.getShape().x2());
         ASSERT_EQ(shape.x3(), arr_out.getShape().x3());
         ASSERT_EQ(shape.rank(), arr_out.getShape().rank());
-        ASSERT_EQ(int(Rotation::ROT_90), imd.getRotation());
+        ASSERT_EQ(Rotation::ROT_90, imd.getRotation());
         for (size_t i = 0; i < 18; ++i) {
             ASSERT_EQ(expected_data[i], data_out[i]);
         }
@@ -586,7 +589,7 @@ TEST(RotateTests, Rotate) {
         ASSERT_EQ(shape.x1(), arr_out.getShape().x1());
         ASSERT_EQ(shape.x2(), arr_out.getShape().x2());
         ASSERT_EQ(shape.rank(), arr_out.getShape().rank());
-        ASSERT_EQ(int(Rotation::ROT_270), imd.getRotation());
+        ASSERT_EQ(Rotation::ROT_270, imd.getRotation());
         for (size_t i = 0; i < 12; ++i) {
             ASSERT_EQ(expected_data[i], data_out[i]);
         }
@@ -611,7 +614,7 @@ TEST(RotateTests, Rotate) {
         ASSERT_EQ(shape.x2(), arr_out.getShape().x1());
         ASSERT_EQ(shape.x1(), arr_out.getShape().x2());
         ASSERT_EQ(shape.rank(), arr_out.getShape().rank());
-        ASSERT_EQ(int(Rotation::ROT_90), imd.getRotation());
+        ASSERT_EQ(Rotation::ROT_90, imd.getRotation());
         for (size_t i = 0; i < 12; ++i) {
             ASSERT_EQ(expected_data[i], data_out[i]);
         }
@@ -623,12 +626,13 @@ TEST(RotateTests, Rotate) {
         NDArray arr_in(data_in, shape.size(), NDArray::NullDeleter(), shape);
         ImageData imd(arr_in);
 
-        ASSERT_THROW(karabo::util::rotateImage(imd, 1), karabo::util::ParameterException);
+        ASSERT_THROW(karabo::util::rotateImage(imd, 1), karabo::data::ParameterException);
     }
 }
 
 TEST(FlipTests, Flip) {
     using namespace karabo::util;
+    using namespace karabo::data;
     using namespace karabo::xms;
 
     // Test horizontal flip

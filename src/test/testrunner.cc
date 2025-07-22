@@ -15,26 +15,26 @@ KaraboDeviceFixture::KaraboDeviceFixture() {
     m_eventLoopThread = std::thread(&karabo::net::EventLoop::work);
 
     // Instantiate C++ Device Server.
-    karabo::util::Hash config("serverId", DEVICE_SERVER_ID, "scanPlugins", false, "Logger.priority", LOG_PRIORITY);
+    karabo::data::Hash config("serverId", DEVICE_SERVER_ID,"log.level", LOG_PRIORITY);
     m_deviceSrv = DeviceServer::create("DeviceServer", config);
     m_deviceSrv->finalizeInternalInitialization();
     // Instantiate C++ Device Client.
-    m_deviceCli = boost::make_shared<DeviceClient>();
+    m_deviceCli = std::make_shared<DeviceClient>();
 }
 
 void KaraboDeviceFixture::instantiateAndGetPointer(const std::string& classId, const std::string& instanceId,
-                                                   const karabo::util::Hash& devCfg,
-                                                   karabo::core::BaseDevice::Pointer& base_device) {
+                                                   const karabo::data::Hash& devCfg,
+                                                   karabo::core::Device::Pointer& base_device) {
     std::string errorMsg, errorDetails;
 
     try {
         // instantiate the device to be tested
-        base_device = BaseDevice::create(classId, devCfg);
+        base_device = Device::create(classId, devCfg);
         // TODO: explain this magic incantation
         base_device->finalizeInternalInitialization(m_deviceSrv->getConnection()->clone(instanceId), false, "");
-    } catch (const karabo::util::Exception& e) {
+    } catch (const karabo::data::Exception& e) {
         errorMsg = e.userFriendlyMsg();
-        if (errorMsg.empty()) errorMsg = "Unexpected karabo::util::Exception";
+        if (errorMsg.empty()) errorMsg = "Unexpected karabo::data::Exception";
         errorDetails = e.detailedMsg();
     } catch (const std::exception& e) {
         errorMsg = e.what();
