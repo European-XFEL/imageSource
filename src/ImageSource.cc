@@ -175,13 +175,13 @@ namespace karabo {
         util::unpackAnyFormat(data, width * height, 12, unpackedData);
     }
 
-    void util::unpackBayerRG10p(const uint8_t* data, const uint32_t width, const uint32_t height,
-                                uint16_t* unpackedData) {
+    void util::unpackBayer10p(const uint8_t* data, const uint32_t width, const uint32_t height,
+                              uint16_t* unpackedData) {
         util::unpackAnyFormat(data, width * height, 10, unpackedData);
     }
 
-    void util::unpackBayerRG12p(const uint8_t* data, const uint32_t width, const uint32_t height,
-                                uint16_t* unpackedData) {
+    void util::unpackBayer12p(const uint8_t* data, const uint32_t width, const uint32_t height,
+                              uint16_t* unpackedData) {
         util::unpackAnyFormat(data, width * height, 12, unpackedData);
     }
 

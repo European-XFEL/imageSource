@@ -152,7 +152,7 @@ namespace karabo {
         void unpackMono12p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
 
         /**
-         * @brief Unpack the input BayerRG10p data to BayerRG10.
+         * @brief Unpack the input BayerRG10p (BayerGR10p) data to BayerRG10 (BayerGR10).
          *
          * Since in BayerRG10p pixel data format there is no padding, 1.25 bytes/pixel are used,
          * according to the following table:
@@ -181,15 +181,17 @@ namespace karabo {
          *
          * @endverbatim
          *
+         * BayerGR10p has pretty much the same format, just color channels are swapped.
+         *
          * @param data The pointer to the input packed data
          * @param width The image width
          * @param height The image height
          * @param unpackedData The pointer to the output unpacked data
          */
-        void unpackBayerRG10p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
+        void unpackBayer10p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
 
         /**
-         * @brief Unpack the input BayerRG12p data to BayerRG12.
+         * @brief Unpack the input BayerRG12p (BayerGR12p) data to BayerRG12 (BayerRG12).
          *
          * Since in BayerRG12p pixel data format there is no padding, 1.5 bytes/pixel are used,
          * according to the following table:
@@ -214,12 +216,14 @@ namespace karabo {
          *
          * @endverbatim
          *
+         * BayerGR12p has pretty much the same format, just color channels are swapped.
+         *
          * @param data The pointer to the input packed data
          * @param width The image width
          * @param height The image height
          * @param unpackedData The pointer to the output unpacked data
          */
-        void unpackBayerRG12p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
+        void unpackBayer12p(const uint8_t* data, const uint32_t width, const uint32_t height, uint16_t* unpackedData);
 
         /**
          * @brief Decode a JPEG image to GRAY.

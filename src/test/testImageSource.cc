@@ -235,7 +235,7 @@ TEST(UnpackTests, BayerRG10p) {
         0b101, 0b10100, 0b1100000, 0b10000000, 0b1,
         0b111, 0b11100, 0b10000000, 0, 0b10};
 
-    ASSERT_NO_THROW(karabo::util::unpackBayerRG10p(packedData.data(), 8, 2, unpackedData.data()));
+    ASSERT_NO_THROW(karabo::util::unpackBayer10p(packedData.data(), 8, 2, unpackedData.data()));
     ASSERT_EQ((uint16_t)0b1, unpackedData[0]); // pixel0
     ASSERT_EQ((uint16_t)0b1, unpackedData[1]); // pixel1
     ASSERT_EQ((uint16_t)0b10, unpackedData[2]); // pixel2
@@ -264,7 +264,7 @@ TEST(UnpackTests, BayerRG12p) {
         0b101, 0b1010000, 0, 0b110, 0b1100000, 0,
         0b111, 0b1110000, 0, 0b1000, 0b10000000, 0};
 
-    ASSERT_NO_THROW(karabo::util::unpackBayerRG12p(packedData.data(), 8, 2, unpackedData.data()));
+    ASSERT_NO_THROW(karabo::util::unpackBayer12p(packedData.data(), 8, 2, unpackedData.data()));
     ASSERT_EQ((uint16_t)0b1, unpackedData[0]); // pixel0
     ASSERT_EQ((uint16_t)0b1, unpackedData[1]); // pixel1
     ASSERT_EQ((uint16_t)0b10, unpackedData[2]); // pixel2
