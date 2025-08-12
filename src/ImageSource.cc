@@ -72,11 +72,7 @@ namespace karabo {
         Schema schemaUpdate;
         this->schema_update_helper(schemaUpdate, "output", "Output", shape, encoding, kType);
 
-        std::vector<unsigned long long> daqShape = shape;
-        std::reverse(daqShape.begin(),
-                     daqShape.end()); // NB DAQ wants fastest changing index first, e.g.
-                                      // (width, height) or (channel, width, height)
-        this->schema_update_helper(schemaUpdate, "daqOutput", "DAQ Output", daqShape, encoding, kType);
+        this->schema_update_helper(schemaUpdate, "daqOutput", "DAQ Output", shape, encoding, kType);
 
         this->appendSchema(schemaUpdate);
     }
@@ -121,12 +117,6 @@ namespace karabo {
         imageData.setBinning(binning);
 
         const std::future<void> output_future = this->startDataSending("output", imageData, timestamp, safeNDArray);
-
-        // NB DAQ wants fastest changing index first, e.g. (width, height) or
-        // (channel, width, height)
-        Dims daqShape = data.getShape();
-        daqShape.reverse();
-        imageData.setDimensions(daqShape);
         const std::future<void> daq_future = this->startDataSending("daqOutput", imageData, timestamp, safeNDArray);
 
         output_future.wait();
