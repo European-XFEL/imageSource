@@ -1,0 +1,18 @@
+stages:
+  - lint
+  - build
+  - test
+  - depends
+  - package
+  - publish
+
+include:
+  - project: karabo/gitlabci
+    file: .cpp-ci.yml
+    ref: main
+  - project: karabo/gitlabci
+    file: .mirror-device.yml
+    ref: main
+  - project: karabo/gitlabci
+    file: .dependabot.yml
+    ref: main
