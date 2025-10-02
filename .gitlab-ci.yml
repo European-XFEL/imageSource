@@ -1,21 +1,15 @@
-stages:
-  - lint
-  - build
-  - test
-  - depends
-  - package
-  - publish
+Push:
+  trigger:
+    include: .cpp-ci.yml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
 
-include:
-  - project: karabo/gitlabci
-    file: .cpp-ci.yml
-    ref: main
-  - project: karabo/gitlabci
-    file: .cpp-package.yml
-    ref: main
-  - project: karabo/gitlabci
-    file: .mirror-device.yml
-    ref: main
-  - project: karabo/gitlabci
-    file: .dependabot.yml
-    ref: main
+
+Release:
+  trigger:
+    include:
+      - project: karabo/gitlabci
+        file: .cpp-custom-package.yml
+        ref: main
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger"
