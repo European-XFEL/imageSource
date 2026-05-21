@@ -1,5 +1,6 @@
 stages:
   - lint
+  - docs
   - build
   - test
   - depends
