@@ -58,29 +58,36 @@ namespace karabo {
                                          const Types::ReferenceType& kType) {
         boost::mutex::scoped_lock lock(m_updateSchemaMtx);
 
-        const Schema& schema = this->getFullSchema();
-        const std::vector<unsigned long long>& currentShape = schema.getDefaultValue<std::vector<unsigned long long>>("output.schema.data.image.dims");
-        const int currentEncoding = schema.getDefaultValue<int>("output.schema.data.image.encoding");
-        const int currentKType = schema.getDefaultValue<int>("output.schema.data.image.pixels.type");
+        Schema deviceSchema = this->getFullSchema();
+        const bool needUpdate = this->updateDeviceSchema(shape, encoding, kType, deviceSchema);
+        if (needUpdate) {
+            this->appendSchema(deviceSchema);
+        }
+    }
+
+    bool ImageSource::updateDeviceSchema(const std::vector<unsigned long long>& shape, const karabo::xms::Encoding& encoding,
+                                         const karabo::data::Types::ReferenceType& kType, karabo::data::Schema& deviceSchema) const {
+        const std::vector<unsigned long long>& currentShape = deviceSchema.getDefaultValue<std::vector<unsigned long long>>("output.schema.data.image.dims");
+        const int currentEncoding = deviceSchema.getDefaultValue<int>("output.schema.data.image.encoding");
+        const int currentKType = deviceSchema.getDefaultValue<int>("output.schema.data.image.pixels.type");
 
         if (shape == currentShape && static_cast<const int>(encoding) == currentEncoding && kType == currentKType) {
             // Nothing to be updated
             KARABO_LOG_FRAMEWORK_DEBUG << "No need to update the output schema";
-            return;
+            return false;
         }
 
-        Schema schemaUpdate;
-        this->schema_update_helper(schemaUpdate, "output", "Output", shape, encoding, kType);
+        this->schema_update_helper(deviceSchema, "output", "Output", shape, encoding, kType);
 
-        this->schema_update_helper(schemaUpdate, "daqOutput", "DAQ Output", shape, encoding, kType);
+        this->schema_update_helper(deviceSchema, "daqOutput", "DAQ Output", shape, encoding, kType);
 
-        this->appendSchema(schemaUpdate);
+        return true;
     }
 
     void ImageSource::schema_update_helper(Schema& schemaUpdate, const std::string& nodeKey,
                                            const std::string& displayedName,
                                            const std::vector<unsigned long long>& shape, const Encoding& encoding,
-                                           const Types::ReferenceType& kType) {
+                                           const Types::ReferenceType& kType) const{
         Schema dataSchema;
         NODE_ELEMENT(dataSchema).key("data").displayedName("Data").setDaqDataType(DaqDataType::TRAIN).commit();
 

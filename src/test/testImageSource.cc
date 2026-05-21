@@ -27,15 +27,19 @@
 using namespace ::testing;
 
 /*
- * This is a helper class to test ImageSource::updateOutputSchema. The
- * function cannot be tested directly as it is a protected member of
- * ImageSource.
+ * This is a helper class to test ImageSource::updateDeviceSchema and ImageSource::updateOutputSchema.
+ * The functions cannot be tested directly as they are a protected member of ImageSource.
  */
 class ImageSource2 : public karabo::ImageSource {
    public:
     KARABO_CLASSINFO(ImageSource2, "ImageSource2", "1.0")
 
     explicit ImageSource2(const karabo::data::Hash& config) : karabo::ImageSource(config) {};
+
+    bool updateDeviceSchemaPublic(const std::vector<unsigned long long>& shape, const karabo::xms::Encoding& encoding,
+                                  const karabo::data::Types::ReferenceType& kType, karabo::data::Schema& deviceSchema) {
+        return this->updateDeviceSchema(shape, encoding, kType, deviceSchema);
+   }
 
     void updateOutputSchemaPublic(const std::vector<unsigned long long>& shape, const karabo::xms::Encoding& encoding,
                                   const karabo::data::Types::ReferenceType& kType) {
@@ -99,7 +103,27 @@ TEST_F(ImageSourceFixture, testDeviceInstantiation) {
 }
 
 // arguments to TEST are just strings to name your tests
-TEST_F(ImageSourceFixture, testSchemaUpdate) {
+TEST_F(ImageSourceFixture, testDeviceSchemaUpdate) {
+    const std::vector<unsigned long long> shape = {1080, 1920};
+    const karabo::xms::Encoding encoding = karabo::xms::Encoding::RGB;
+    const karabo::data::Types::ReferenceType kType = karabo::data::Types::UINT8;
+
+    karabo::data::Schema schema = imgsrc_device->getFullSchema();
+    ASSERT_NE(shape, schema.getDefaultValue<std::vector<unsigned long long>>("output.schema.data.image.dims"));
+    ASSERT_NE(static_cast<int>(encoding), schema.getDefaultValue<int>("output.schema.data.image.encoding"));
+    ASSERT_NE(kType, schema.getDefaultValue<int>("output.schema.data.image.pixels.type"));
+
+    bool updated = imgsrc_device->updateDeviceSchemaPublic(shape, encoding, kType, schema);
+    ASSERT_TRUE(updated);
+    ASSERT_EQ(shape, schema.getDefaultValue<std::vector<unsigned long long>>("output.schema.data.image.dims"));
+    ASSERT_EQ(static_cast<int>(encoding), schema.getDefaultValue<int>("output.schema.data.image.encoding"));
+    ASSERT_EQ(kType, schema.getDefaultValue<int>("output.schema.data.image.pixels.type"));
+
+    updated = imgsrc_device->updateDeviceSchemaPublic(shape, encoding, kType, schema);
+    ASSERT_FALSE(updated);
+}
+
+TEST_F(ImageSourceFixture, testOutputSchemaUpdate) {
     const std::vector<unsigned long long> shape = {1080, 1920};
     const karabo::xms::Encoding encoding = karabo::xms::Encoding::RGB;
     const karabo::data::Types::ReferenceType kType = karabo::data::Types::UINT8;

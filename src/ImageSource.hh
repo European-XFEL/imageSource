@@ -35,13 +35,31 @@ namespace karabo {
          * @brief Update the device output schema according to the image properties.
          *
          * @param shape The shape of the image, e.g. (height, width) for
-         * monochromatic- or (height, width, channel) for RGB-images .
+         * monochromatic- or (height, width, channel) for RGB-images.
          * @param encoding The encoding of the image, e.g. Encoding::GRAY or
          * Encoding::RGB.
          * @param kType The image data type, e.g. Types::UINT16.
          */
         void updateOutputSchema(const std::vector<unsigned long long>& shape, const karabo::xms::Encoding& encoding,
                                 const karabo::data::Types::ReferenceType& kType);
+
+        /**
+         * @brief Update the input device schema according to the image properties.
+         *
+         * N.B. The updated schema will not be published, you have to call Device::updateSchema
+         * or Device::appendSchema yourself.
+         * 
+         * @param shape The shape of the image, e.g. (height, width) for
+         * monochromatic- or (height, width, channel) for RGB-images.
+         * @param encoding The encoding of the image, e.g. Encoding::GRAY or
+         * Encoding::RGB.
+         * @param kType The image data type, e.g. Types::UINT16.
+         * @param deviceSchema The full device schema, to be processed by this function.
+         * 
+         * @return 'true' in case the input schema has been changed and needs to be published.
+         */
+        bool updateDeviceSchema(const std::vector<unsigned long long>& shape, const karabo::xms::Encoding& encoding,
+                                const karabo::data::Types::ReferenceType& kType, karabo::data::Schema& deviceSchema) const;
 
         /**
          * @brief Write the image and its metadata to the output channels.
@@ -73,7 +91,7 @@ namespace karabo {
         void schema_update_helper(karabo::data::Schema& schemaUpdate, const std::string& nodeKey,
                                   const std::string& displayedName, const std::vector<unsigned long long>& shape,
                                   const karabo::xms::Encoding& encoding,
-                                  const karabo::data::Types::ReferenceType& kType);
+                                  const karabo::data::Types::ReferenceType& kType) const;
 
         std::future<void> startDataSending(const char* channelName, karabo::xms::ImageData& imageData,
                                            const karabo::data::Timestamp& timestamp, bool safeNDArray);
